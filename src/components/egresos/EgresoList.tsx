@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 
 export function EgresoList() {
   const router = useRouter();
@@ -40,8 +41,6 @@ export function EgresoList() {
       setLoading(false);
     }
   }
-
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {

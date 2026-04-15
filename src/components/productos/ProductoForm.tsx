@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { ProductoForm as ProductoFormType, Producto } from '@/types/producto';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/lib/utils';
 
 const initialForm: ProductoFormType = {
   nombre: '',
@@ -295,8 +296,7 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
         {formData.precioCompra > 0 && formData.precioVenta > 0 && (
           <div className="mt-4 rounded-md bg-green-50 p-3">
             <p className="text-sm text-green-800">
-              <strong>Margen de ganancia:</strong> $
-              {(formData.precioVenta - formData.precioCompra).toFixed(2)} (
+              <strong>Margen de ganancia:</strong> {formatCurrency(formData.precioVenta - formData.precioCompra)} (
               {(((formData.precioVenta - formData.precioCompra) / formData.precioCompra) * 100).toFixed(1)}
               %)
             </p>

@@ -7,6 +7,7 @@ import { useRole } from '@/hooks/useRole';
 import Link from 'next/link';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { formatCurrency } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Venta } from '@/types/venta';
 
@@ -145,7 +146,12 @@ export default function DashboardPage() {
     fetchStats();
   }, []);
 
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+  const statsData = [
+    { label: 'Ventas hoy', value: formatCurrency(stats.ventasHoy), icon: '💰', color: 'blue' },
+    { label: 'Productos en stock', value: stats.productosStock.toString(), icon: '📦', color: 'gray' },
+    { label: 'Ingresos del mes', value: formatCurrency(stats.ingresosMes), icon: '📈', color: 'green' },
+    { label: 'Egresos del mes', value: formatCurrency(stats.egresosMes), icon: '📉', color: 'red' },
+  ];
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';
@@ -157,13 +163,6 @@ export default function DashboardPage() {
       minute: '2-digit',
     }).format(date);
   };
-
-  const statsData = [
-    { label: 'Ventas hoy', value: formatCurrency(stats.ventasHoy), icon: '💰', color: 'blue' },
-    { label: 'Productos en stock', value: stats.productosStock.toString(), icon: '📦', color: 'green' },
-    { label: 'Ingresos del mes', value: formatCurrency(stats.ingresosMes), icon: '📈', color: 'green' },
-    { label: 'Egresos del mes', value: formatCurrency(stats.egresosMes), icon: '📉', color: 'red' },
-  ];
 
   const balance = stats.ingresosMes - stats.egresosMes;
 

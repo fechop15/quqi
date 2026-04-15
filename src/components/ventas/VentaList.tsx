@@ -8,6 +8,7 @@ import { Venta, VentaItem } from '@/types/venta';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 export function VentaList() {
   const router = useRouter();
@@ -47,10 +48,6 @@ export function VentaList() {
       setLoading(false);
     }
   }
-
-  const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
-  };
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';

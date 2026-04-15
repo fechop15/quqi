@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Producto } from '@/types/producto';
 import { VentaItem } from '@/types/venta';
+import { formatCurrency } from '@/lib/utils';
 
 interface VentaItemForm extends Omit<VentaItem, 'subtotal'> {
   subtotal: number;
@@ -190,7 +191,7 @@ export function VentaForm() {
               <option value="">Seleccionar producto...</option>
               {productos.map((producto) => (
                 <option key={producto.id} value={producto.id}>
-                  {producto.nombre} - ${producto.precioVenta.toFixed(2)} (Stock: {producto.stock})
+                  {producto.nombre} - {formatCurrency(producto.precioVenta)} (Stock: {producto.stock})
                 </option>
               ))}
             </select>
@@ -241,8 +242,8 @@ export function VentaForm() {
                   <tr key={index} className="border-b">
                     <td className="px-4 py-3">{item.producto}</td>
                     <td className="px-4 py-3">{item.cantidad}</td>
-                    <td className="px-4 py-3">${item.precioUnitario.toFixed(2)}</td>
-                    <td className="px-4 py-3 font-medium">${item.subtotal.toFixed(2)}</td>
+                    <td className="px-4 py-3">{formatCurrency(item.precioUnitario)}</td>
+                    <td className="px-4 py-3 font-medium">{formatCurrency(item.subtotal)}</td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
@@ -259,7 +260,7 @@ export function VentaForm() {
                 <tr>
                   <td colSpan={3} className="px-4 py-3 text-right font-semibold">Total:</td>
                   <td className="px-4 py-3 text-lg font-bold text-green-600">
-                    ${total.toFixed(2)}
+                    Total: {formatCurrency(total)}
                   </td>
                   <td></td>
                 </tr>

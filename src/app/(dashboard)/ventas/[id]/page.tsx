@@ -10,6 +10,7 @@ import { useRole } from '@/hooks/useRole';
 import { Venta, VentaItem } from '@/types/venta';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 
 export default function VentaDetallePage() {
   const router = useRouter();
@@ -44,8 +45,6 @@ export default function VentaDetallePage() {
 
     fetchVenta();
   }, [ventaId, router]);
-
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';

@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase';
 import { Producto } from '@/types/producto';
 import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -117,8 +118,8 @@ export function ProductoList() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{producto.sku || '-'}</td>
                   <td className="px-4 py-3">
-                    <p className="font-medium">${producto.precioVenta.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">Compra: ${producto.precioCompra.toFixed(2)}</p>
+                    <p className="font-medium">{formatCurrency(producto.precioVenta)}</p>
+                    <p className="text-xs text-gray-500">Compra: {formatCurrency(producto.precioCompra)}</p>
                   </td>
                   <td className="px-4 py-3">
                     <span
