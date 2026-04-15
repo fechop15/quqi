@@ -2,8 +2,11 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProductoList } from '@/components/productos/ProductoList';
+import { PageHeader } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
 import { useRole } from '@/hooks/useRole';
+import { Plus } from 'lucide-react';
 
 export default function ProductosPage() {
   const role = useRole();
@@ -11,17 +14,19 @@ export default function ProductosPage() {
 
   return (
     <ProtectedRoute requiredRoles={['admin', 'gerente', 'vendedor']}>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
-        {canCreate && (
-          <Link
-            href="/productos/nuevo"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            + Nuevo Producto
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Productos"
+        description="Gestiona tu catálogo de productos"
+        actions={
+          canCreate && (
+            <Link href="/productos/nuevo">
+              <Button leftIcon={<Plus className="h-4 w-4" />}>
+                Nuevo Producto
+              </Button>
+            </Link>
+          )
+        }
+      />
 
       <ProductoList />
     </ProtectedRoute>

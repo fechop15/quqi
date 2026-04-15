@@ -2,25 +2,17 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProductoForm } from '@/components/productos/ProductoForm';
-import Link from 'next/link';
+import { PageHeader } from '@/components/ui';
 
 export default function EditarProductoPage() {
   return (
     <ProtectedRoute requiredRoles={['admin', 'gerente']}>
-      <div className="pb-12">
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/productos" className="hover:text-blue-600">
-              Productos
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900">Editar producto</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">Editar producto</h1>
-        </div>
+      <PageHeader
+        title="Editar producto"
+        description="Actualiza la información del producto"
+      />
 
-        <ProductoForm mode="edit" />
-      </div>
+      <ProductoForm mode="edit" />
     </ProtectedRoute>
   );
 }

@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { Input, Badge, Card } from '@/components/ui';
+import { Search, Edit, Trash2, Package } from 'lucide-react';
 
 export function ProductoList() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -24,7 +26,6 @@ export function ProductoList() {
       try {
         let q: Query | CollectionReference = collection(db, 'productos');
 
-        // Vendedores solo ven productos activos
         if (role.isVendedor()) {
           q = query(q, where('activo', '==', true));
         }
@@ -54,119 +55,129 @@ export function ProductoList() {
   const stockBajo = (producto: Producto) => producto.stock <= producto.stockMinimo;
 
   const handleDelete = async (id: string, nombre: string) => {
-    if (!confirm(`¿Estás seguro de eliminar "${nombre}"? Esta acción no se puede deshacer.`)) {
+    if (!confirm(`¿Estás seguro de eliminar "${nombre}"?`)) {
       return;
     }
 
     try {
       await deleteDoc(doc(db, 'productos', id));
       setProductos(productos.filter((p) => p.id !== id));
-      toast.success('Producto eliminado exitosamente');
+      toast.success('Producto eliminado');
     } catch (error) {
-      console.error('Error al eliminar producto:', error);
-      toast.error('Error al eliminar el producto');
+      toast.error('Error al eliminar');
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">Cargando productos...</div>;
+    return <div className="text-center py-12 text-text-muted">Cargando productos...</div>;
   }
 
   return (
     <div>
-      <div className="mb-4 flex justify-between items-center">
-        <input
-          type="text"
+      <div className="mb-4">
+        <Input
           placeholder="Buscar producto..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-md rounded-md border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          leftIcon={<Search className="h-5 w-5" />}
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-white shadow">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Producto</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">SKU</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Precio</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Stock</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
-              {role.isGerente() || role.isAdmin() ? (
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
-              ) : null}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProductos.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                  No hay productos registrados
-                </td>
-              </tr>
-            ) : (
-              filteredProductos.map((producto) => (
-                <tr key={producto.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="font-medium">{producto.nombre}</p>
-                      {producto.categoria && (
-                        <p className="text-sm text-gray-500">{producto.categoria}</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{producto.sku || '-'}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium">{formatCurrency(producto.precioVenta)}</p>
-                    <p className="text-xs text-gray-500">Compra: {formatCurrency(producto.precioCompra)}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        stockBajo(producto)
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {producto.stock} {stockBajo(producto) && '(Bajo)'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        producto.activo
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {producto.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
+      {filteredProductos.length === 0 ? (
+        <Card className="text-center py-12">
+          <Package className="h-12 w-12 mx-auto text-text-muted mb-4" />
+          <p className="text-text-secondary">No hay productos registrados</p>
+          {role.isGerente() || role.isAdmin() ? (
+            <Link href="/productos/nuevo" className="text-primary-500 hover:text-primary-600 text-sm font-medium mt-2 inline-block">
+              Crear primer producto
+            </Link>
+          ) : null}
+        </Card>
+      ) : (
+        <Card padding="none">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-border">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">SKU</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Precio</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Margen</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Estado</th>
                   {(role.isGerente() || role.isAdmin()) && (
-                    <td className="px-4 py-3 text-sm">
-                      <Link
-                        href={`/productos/${producto.id}/editar`}
-                        className="text-blue-600 hover:text-blue-800 mr-3"
-                      >
-                        Editar
-                      </Link>
-                      {role.isAdmin() && (
-                        <button
-                          onClick={() => handleDelete(producto.id, producto.nombre)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Eliminar
-                        </button>
-                      )}
-                    </td>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Acciones</th>
                   )}
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredProductos.map((producto) => (
+                  <tr key={producto.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-text-primary">{producto.nombre}</p>
+                      {producto.categoria && (
+                        <p className="text-sm text-text-muted">{producto.categoria}</p>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary font-mono">{producto.sku || '-'}</td>
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-text-primary">{formatCurrency(producto.precioVenta)}</p>
+                      <p className="text-xs text-text-muted">Compra: {formatCurrency(producto.precioCompra)}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      {(() => {
+                        const valorMargen = producto.precioVenta - producto.precioCompra;
+                        const margen = producto.precioVenta > 0
+                          ? (valorMargen / producto.precioVenta * 100)
+                          : 0;
+                        const variant = margen >= 30 ? 'success' : margen >= 15 ? 'warning' : 'danger';
+                        return (
+                          <div>
+                            <Badge variant={variant}>
+                              {margen.toFixed(1)}%
+                            </Badge>
+                            <p className="text-xs text-text-muted mt-1">{formatCurrency(valorMargen)}</p>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={stockBajo(producto) ? 'danger' : 'success'} dot>
+                        {producto.stock} {stockBajo(producto) && '(Bajo)'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={producto.activo ? 'primary' : 'default'}>
+                        {producto.activo ? 'Activo' : 'Inactivo'}
+                      </Badge>
+                    </td>
+                    {(role.isGerente() || role.isAdmin()) && (
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={`/productos/${producto.id}/editar`}
+                          className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm font-medium cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Editar
+                        </Link>
+                        {role.isAdmin() && (
+                          <button
+                            onClick={() => handleDelete(producto.id, producto.nombre)}
+                            className="inline-flex items-center gap-1 text-danger-500 hover:text-danger-600 text-sm font-medium ml-4 cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Eliminar
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

@@ -7,16 +7,18 @@ import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { EgresoForm as EgresoFormType } from '@/types/egreso';
+import { Input, Textarea, Select, Button, Card } from '@/components/ui';
+import { TrendingDown } from 'lucide-react';
 
 const categorias = [
-  'Compra',
-  'Servicio',
-  'Nómina',
-  'Alquiler',
-  'Servicios básicos',
-  'Impuestos',
-  'Mantenimiento',
-  'Otro',
+  { value: 'Compra', label: 'Compra' },
+  { value: 'Servicio', label: 'Servicio' },
+  { value: 'Nómina', label: 'Nómina' },
+  { value: 'Alquiler', label: 'Alquiler' },
+  { value: 'Servicios básicos', label: 'Servicios básicos' },
+  { value: 'Impuestos', label: 'Impuestos' },
+  { value: 'Mantenimiento', label: 'Mantenimiento' },
+  { value: 'Otro', label: 'Otro' },
 ];
 
 const initialForm: EgresoFormType = {
@@ -32,9 +34,7 @@ export function EgresoForm() {
   const [formData, setFormData] = useState<EgresoFormType>(initialForm);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -44,7 +44,7 @@ export function EgresoForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(false);
 
     try {
       await addDoc(collection(db, 'egresos'), {
@@ -65,100 +65,68 @@ export function EgresoForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-lg border bg-white p-6 shadow">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Información del egreso</h3>
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingDown className="h-5 w-5 text-[#ef4444]" />
+          <h3 className="text-lg font-semibold text-[#1e293b]">Información del egreso</h3>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="monto" className="block text-sm font-medium text-gray-700">
-              Monto *
-            </label>
-            <div className="relative mt-1">
-              <span className="absolute left-3 top-2 text-gray-500">$</span>
-              <input
-                type="number"
-                id="monto"
-                name="monto"
-                value={formData.monto}
-                onChange={handleChange}
-                min="0.01"
-                step="0.01"
-                required
-                className="block w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
+          <Input
+            label="Monto *"
+            name="monto"
+            type="number"
+            value={formData.monto}
+            onChange={handleChange}
+            min={0.01}
+            step={0.01}
+            placeholder="0.00"
+            required
+          />
 
-          <div>
-            <label htmlFor="categoria" className="block text-sm font-medium text-gray-700">
-              Categoría *
-            </label>
-            <select
-              id="categoria"
-              name="categoria"
-              value={formData.categoria}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              {categorias.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Categoría *"
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+            options={categorias}
+            required
+          />
 
           <div className="sm:col-span-2">
-            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
-              Descripción *
-            </label>
-            <textarea
-              id="descripcion"
+            <Textarea
+              label="Descripción *"
               name="descripcion"
               value={formData.descripcion}
               onChange={handleChange}
-              required
-              rows={3}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Describa el motivo del egreso"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="fecha" className="block text-sm font-medium text-gray-700">
-              Fecha *
-            </label>
-            <input
-              type="date"
-              id="fecha"
-              name="fecha"
-              value={formData.fecha}
-              onChange={handleChange}
+              rows={3}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
+
+          <Input
+            label="Fecha *"
+            name="fecha"
+            type="date"
+            value={formData.fecha}
+            onChange={handleChange}
+            required
+          />
         </div>
-      </div>
+      </Card>
 
-      <div className="flex gap-4">
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-red-600 px-6 py-2 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Guardando...' : 'Guardar egreso'}
-        </button>
-
-        <button
+      <div className="flex gap-3">
+        <Button type="submit" variant="danger" isLoading={loading}>
+          Guardar egreso
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => router.back()}
-          className="rounded-md border border-gray-300 bg-white px-6 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancelar
-        </button>
+        </Button>
       </div>
     </form>
   );

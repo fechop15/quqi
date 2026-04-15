@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
+import { Badge } from '@/components/ui';
+import { Eye, XCircle, ShoppingCart } from 'lucide-react';
 
 export function VentaList() {
   const router = useRouter();
@@ -28,7 +30,6 @@ export function VentaList() {
     try {
       let q: Query | CollectionReference = collection(db, 'ventas');
 
-      // Vendedores solo ven sus propias ventas
       if (role.isVendedor()) {
         q = query(q, where('vendedorId', '==', user.uid));
       }
@@ -51,23 +52,23 @@ export function VentaList() {
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat('es-ES', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
+    try {
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return new Intl.DateTimeFormat('es-ES', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(date);
+    } catch {
+      return '-';
+    }
   };
 
-  const getStatusColor = (estado: string) => {
+  const getStatusBadge = (estado: string): 'success' | 'warning' | 'danger' | 'default' => {
     switch (estado) {
-      case 'completada':
-        return 'bg-green-100 text-green-800';
-      case 'pendiente':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelada':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'completada': return 'success';
+      case 'pendiente': return 'warning';
+      case 'cancelada': return 'danger';
+      default: return 'default';
     }
   };
 
@@ -81,13 +82,11 @@ export function VentaList() {
     setCancelingId(venta.id);
 
     try {
-      // Actualizar estado de la venta
       await updateDoc(doc(db, 'ventas', venta.id), {
         estado: 'cancelada',
         updatedAt: serverTimestamp(),
       });
 
-      // Restaurar stock de cada producto
       const restorePromises = venta.items.map(async (item: VentaItem) => {
         const productoRef = doc(db, 'productos', item.productoId);
         const productoDoc = await getDoc(productoRef);
@@ -102,85 +101,86 @@ export function VentaList() {
       });
 
       await Promise.all(restorePromises);
-
-      toast.success('Venta cancelada exitosamente');
-      
-      // Recargar la lista
+      toast.success('Venta cancelada');
       fetchVentas();
     } catch (error) {
-      console.error('Error al cancelar venta:', error);
-      toast.error('Error al cancelar la venta');
+      toast.error('Error al cancelar');
     } finally {
       setCancelingId(null);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">Cargando ventas...</div>;
+    return <div className="text-center py-12 text-[#64748b]">Cargando ventas...</div>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white shadow">
-      <table className="w-full">
-        <thead className="bg-gray-50 border-b">
-          <tr>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Fecha</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Cliente</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vendedor</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ventas.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                No hay ventas registradas
-              </td>
-            </tr>
-          ) : (
-            ventas.map((venta) => (
-              <tr key={venta.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm font-mono text-gray-600">
-                  {venta.id.slice(0, 8)}...
-                </td>
-                <td className="px-4 py-3 text-sm">{formatDate(venta.fecha)}</td>
-                <td className="px-4 py-3 text-sm">{venta.cliente || 'Mostrador'}</td>
-                <td className="px-4 py-3 text-sm">{venta.vendedorNombre || profile?.nombre}</td>
-                <td className="px-4 py-3 font-medium">{formatCurrency(venta.total)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
-                      venta.estado
-                    )}`}
-                  >
-                    {venta.estado}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <button 
-                    onClick={() => router.push(`/ventas/${venta.id}`)}
-                    className="text-blue-600 hover:text-blue-800 mr-3"
-                  >
-                    Ver
-                  </button>
-                  {(role.isGerente() || role.isAdmin()) && venta.estado !== 'cancelada' && (
-                    <button 
-                      onClick={() => handleCancelarVenta(venta)}
-                      disabled={cancelingId === venta.id}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
-                    >
-                      {cancelingId === venta.id ? 'Cancelando...' : 'Cancelar'}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+    <div>
+      {ventas.length === 0 ? (
+        <div className="rounded-xl border border-border-main bg-white p-12 text-center">
+          <ShoppingCart className="h-12 w-12 mx-auto text-[#94a3b8] mb-4" />
+          <p className="text-[#64748b] mb-2">No hay ventas registradas</p>
+          <button
+            onClick={() => router.push('/ventas/nueva')}
+            className="text-[#6366f1] hover:text-[#4f46e5] font-medium text-sm"
+          >
+            Registrar primera venta
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border-main bg-white overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#f8fafc] border-b border-border-main">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Cliente</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-[#64748b] uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {ventas.map((venta) => (
+                  <tr key={venta.id} className="hover:bg-[#f8fafc]/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-mono text-[#64748b]">
+                      {venta.id.slice(0, 8)}...
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[#1e293b]">{formatDate(venta.fecha)}</td>
+                    <td className="px-6 py-4 text-sm text-[#1e293b]">{venta.cliente || 'Mostrador'}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-[#10b981]">{formatCurrency(venta.total)}</td>
+                    <td className="px-6 py-4">
+                      <Badge variant={getStatusBadge(venta.estado)} size="sm">
+                        {venta.estado}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => router.push(`/ventas/${venta.id}`)}
+                        className="inline-flex items-center gap-1 text-[#6366f1] hover:text-[#4f46e5] text-sm font-medium mr-4 cursor-pointer"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Ver
+                      </button>
+                      {(role.isGerente() || role.isAdmin()) && venta.estado !== 'cancelada' && (
+                        <button 
+                          onClick={() => handleCancelarVenta(venta)}
+                          disabled={cancelingId === venta.id}
+                          className="inline-flex items-center gap-1 text-[#ef4444] hover:text-[#dc2626] text-sm font-medium cursor-pointer disabled:opacity-50"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          {cancelingId === venta.id ? 'Cancelando...' : 'Cancelar'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

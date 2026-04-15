@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Usuario } from '@/types/usuario';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/types/auth';
 import { toast } from 'sonner';
-import Link from 'next/link';
+import { Badge } from '@/components/ui';
+import { Input } from '@/components/ui';
+import { Edit, Trash2, UserCog, Search, Users } from 'lucide-react';
 
 export function UserList() {
-  const router = useRouter();
   const { user } = useAuth();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,54 +48,48 @@ export function UserList() {
       await updateDoc(doc(db, 'usuarios', usuario.id), {
         activo: !usuario.activo,
       });
-      toast.success(
-        usuario.activo ? 'Usuario desactivado exitosamente' : 'Usuario activado exitosamente'
-      );
+      toast.success(usuario.activo ? 'Usuario desactivado' : 'Usuario activado');
       fetchUsuarios();
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      toast.error('Error al actualizar el usuario');
+      toast.error('Error al actualizar');
     } finally {
       setUpdatingId(null);
     }
   };
 
   const handleEliminar = async (id: string) => {
-    const confirmed = window.confirm(
-      '¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.'
-    );
+    const confirmed = window.confirm('¿Estás seguro de eliminar este usuario?');
     if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, 'usuarios', id));
-      toast.success('Usuario eliminado exitosamente');
+      toast.success('Usuario eliminado');
       fetchUsuarios();
     } catch (error) {
-      console.error('Error al eliminar usuario:', error);
-      toast.error('Error al eliminar el usuario');
+      toast.error('Error al eliminar');
     }
   };
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
+    try {
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return new Intl.DateTimeFormat('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }).format(date);
+    } catch {
+      return '-';
+    }
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleBadge = (role: string): 'danger' | 'primary' | 'success' | 'default' => {
     switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'gerente':
-        return 'bg-blue-100 text-blue-800';
-      case 'vendedor':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'admin': return 'danger';
+      case 'gerente': return 'primary';
+      case 'vendedor': return 'success';
+      default: return 'default';
     }
   };
 
@@ -105,99 +100,92 @@ export function UserList() {
   );
 
   if (loading) {
-    return <div className="text-center py-8">Cargando usuarios...</div>;
+    return <div className="text-center py-12 text-[#64748b]">Cargando usuarios...</div>;
   }
 
   return (
     <div>
-      {/* Search bar */}
-      <div className="mb-4">
-        <input
-          type="text"
+      <div className="mb-6">
+        <Input
           placeholder="Buscar por nombre o email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          leftIcon={<Search className="h-5 w-5" />}
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border bg-white shadow">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nombre</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Email</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Rol</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Creado</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsuarios.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                  No se encontraron usuarios
-                </td>
-              </tr>
-            ) : (
-              filteredUsuarios.map((usuario) => (
-                <tr key={usuario.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium">{usuario.nombre}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{usuario.email}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleColor(
-                        usuario.role
-                      )}`}
-                    >
-                      {ROLES[usuario.role]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        usuario.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {usuario.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {formatDate(usuario.createdAt)}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <Link
-                      href={`/usuarios/${usuario.id}/editar`}
-                      className="text-blue-600 hover:text-blue-800 mr-3"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => handleToggleActivo(usuario)}
-                      disabled={updatingId === usuario.id}
-                      className="text-yellow-600 hover:text-yellow-800 mr-3 disabled:opacity-50"
-                    >
-                      {updatingId === usuario.id
-                        ? 'Actualizando...'
-                        : usuario.activo
-                        ? 'Desactivar'
-                        : 'Activar'}
-                    </button>
-                    <button
-                      onClick={() => handleEliminar(usuario.id)}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
-                      disabled={updatingId === usuario.id}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+      {filteredUsuarios.length === 0 ? (
+        <div className="rounded-xl border border-border-main bg-white p-12 text-center">
+          <Users className="h-12 w-12 mx-auto text-[#94a3b8] mb-4" />
+          <p className="text-[#64748b] mb-2">No se encontraron usuarios</p>
+          <Link
+            href="/usuarios/nuevo"
+            className="text-[#6366f1] hover:text-[#4f46e5] font-medium text-sm"
+          >
+            Crear primer usuario
+          </Link>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border-main bg-white overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#f8fafc] border-b border-border-main">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Nombre</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Rol</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">Creado</th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-[#64748b] uppercase tracking-wider">Acciones</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {filteredUsuarios.map((usuario) => (
+                  <tr key={usuario.id} className="hover:bg-[#f8fafc]/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-[#1e293b]">{usuario.nombre}</td>
+                    <td className="px-6 py-4 text-sm text-[#64748b]">{usuario.email}</td>
+                    <td className="px-6 py-4">
+                      <Badge variant={getRoleBadge(usuario.role)} size="sm">
+                        {ROLES[usuario.role]}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={usuario.activo ? 'success' : 'default'} size="sm">
+                        {usuario.activo ? 'Activo' : 'Inactivo'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[#64748b]">{formatDate(usuario.createdAt)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        href={`/usuarios/${usuario.id}/editar`}
+                        className="inline-flex items-center gap-1 text-[#6366f1] hover:text-[#4f46e5] text-sm font-medium mr-4 cursor-pointer"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() => handleToggleActivo(usuario)}
+                        disabled={updatingId === usuario.id}
+                        className="inline-flex items-center gap-1 text-[#f59e0b] hover:text-[#d97706] text-sm font-medium mr-4 cursor-pointer disabled:opacity-50"
+                      >
+                        <UserCog className="h-4 w-4" />
+                        {updatingId === usuario.id ? '...' : usuario.activo ? 'Desactivar' : 'Activar'}
+                      </button>
+                      <button
+                        onClick={() => handleEliminar(usuario.id)}
+                        className="inline-flex items-center gap-1 text-[#ef4444] hover:text-[#dc2626] text-sm font-medium cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

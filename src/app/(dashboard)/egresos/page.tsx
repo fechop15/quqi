@@ -2,20 +2,25 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { EgresoList } from '@/components/egresos/EgresoList';
+import { PageHeader } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 
 export default function EgresosPage() {
   return (
     <ProtectedRoute requiredRoles={['admin', 'gerente']}>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Egresos</h1>
-        <Link
-          href="/egresos/nuevo"
-          className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-        >
-          + Nuevo Egreso
-        </Link>
-      </div>
+      <PageHeader
+        title="Egresos"
+        description="Controla los gastos y salidas de dinero"
+        actions={
+          <Link href="/egresos/nuevo">
+            <Button variant="danger" leftIcon={<Plus className="h-4 w-4" />}>
+              Nuevo Egreso
+            </Button>
+          </Link>
+        }
+      />
 
       <EgresoList />
     </ProtectedRoute>

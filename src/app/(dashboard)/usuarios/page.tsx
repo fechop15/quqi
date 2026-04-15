@@ -2,24 +2,27 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { UserList } from '@/components/usuarios/UserList';
+import { PageHeader } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 
 export default function UsuariosPage() {
   return (
     <ProtectedRoute requiredRoles={['admin']}>
-      <div>
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-          <Link
-            href="/usuarios/nuevo"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            + Nuevo Usuario
+      <PageHeader
+        title="Usuarios"
+        description="Gestiona los usuarios y sus permisos"
+        actions={
+          <Link href="/usuarios/nuevo">
+            <Button leftIcon={<Plus className="h-4 w-4" />}>
+              Nuevo Usuario
+            </Button>
           </Link>
-        </div>
+        }
+      />
 
-        <UserList />
-      </div>
+      <UserList />
     </ProtectedRoute>
   );
 }

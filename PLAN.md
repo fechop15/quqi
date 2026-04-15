@@ -397,4 +397,221 @@ npm install sonner
 
 ---
 
-*Última actualización: 2026-04-14*
+---
+
+# PLAN DE REDISEÑO - FASE UX/UI
+
+## Visión del Rediseño
+
+Transformar Quqi de una app funcional a una experiencia visual profesional con un dashboard moderno que inspire confianza y eficiencia.
+
+### Style Guide: Modern Dashboard
+
+| Aspecto | Valor |
+|---------|-------|
+| **Pattern** | Dashboard-focused + Data Visualization |
+| **Style** | Glassmorphism sutil + Soft UI |
+| **Mood** | Profesional, limpio, eficiente |
+| **Accessibility** | WCAG AA compliant |
+
+### Sistema de Colores
+
+```
+Primary:      #6366F1 (Indigo 500)     - Acciones principales
+Secondary:    #8B5CF6 (Violet 500)     - Highlights
+Success:      #10B981 (Emerald 500)    - Ingresos, completado
+Warning:      #F59E0B (Amber 500)      - Alertas, stock bajo
+Danger:       #EF4444 (Red 500)         - Egresos, errores
+Background:   #F8FAFC (Slate 50)       - Fondo general
+Surface:      #FFFFFF                   - Cards, modales
+Text Primary: #1E293B (Slate 800)      - Títulos
+Text Muted:   #64748B (Slate 500)      - Descripciones
+Border:       #E2E8F0 (Slate 200)      - Bordes sutiles
+```
+
+### Tipografía
+
+```
+Headings: Inter (700, 600) - https://fonts.google.com/specimen/Inter
+Body:    Inter (400, 500) - Limpia y legible
+Mono:    JetBrains Mono - Para números y datos
+```
+
+### Espaciado
+
+```
+xs: 4px    |  sm: 8px    |  md: 16px   |  lg: 24px
+xl: 32px   |  2xl: 48px  |  3xl: 64px
+```
+
+---
+
+## Fases de Rediseño
+
+### Fase R1: Fundamentos del Diseño ✅ EN PROCESO
+
+- [ ] 1.1 Sistema de Diseño Base
+  - [ ] Variables CSS en `globals.css`
+  - [ ] Configuración de colores, tipografía y espaciado
+  - [ ] Tailwind config actualizado con custom tokens
+
+- [ ] 1.2 Componentes Base
+  - [ ] `<Button>` - Primario, secundario, outline, ghost, danger
+  - [ ] `<Input>` - Con estados: default, focus, error, disabled
+  - [ ] `<Select>`, `<Textarea>`, `<Checkbox>`
+  - [ ] `<Card>` - Variantes: default, elevated, glass
+  - [ ] `<Badge>` - Estados: success, warning, danger, info
+  - [ ] `<Modal>` - Con backdrop blur y transiciones
+  - [ ] `<Table>` - Headers sticky, hover rows, responsive
+  - [ ] `<EmptyState>` - Ilustraciones para estados vacíos
+
+- [ ] 1.3 Iconos (Reemplazar emojis)
+  - [ ] Instalar `lucide-react` o `heroicons`
+  - [ ] Actualizar sidebar y navegación
+  - [ ] Actualizar botones de acciones
+
+### Fase R2: Layout Principal
+
+- [ ] 2.1 Sidebar Redesenhado
+  - [ ] Logo con icono SVG profesional
+  - [ ] Navegación con iconos y hover states
+  - [ ] Indicador de página activa (pill/highlight)
+  - [ ] User profile card en footer
+  - [ ] Responsive: colapsable en mobile
+
+- [ ] 2.2 Header
+  - [ ] Breadcrumbs dinámicos
+  - [ ] Search global (futuro)
+  - [ ] Notificaciones dropdown (futuro)
+  - [ ] Quick actions
+
+- [ ] 2.3 Layout Responsive
+  - [ ] Mobile: sidebar como drawer
+  - [ ] Tablet: sidebar colapsable
+  - [ ] Desktop: sidebar fijo expandido
+
+### Fase R3: Dashboard Premium
+
+- [ ] 3.1 Stats Cards
+  - [ ] Icono con fondo gradient
+  - [ ] Trend indicator (↑↓)
+  - [ ] Hover: elevación sutil
+  - [ ] Skeleton loading
+
+- [ ] 3.2 Gráficos Mejorados
+  - [ ] Paleta de colores consistente
+  - [ ] Tooltips customizados
+  - [ ] Leyendas claras
+  - [ ] Animaciones de entrada
+
+- [ ] 3.3 Quick Actions
+  - [ ] Botones con iconos
+  - [ ] Hover states con micro-animaciones
+  - [ ] Badges de cantidad
+
+### Fase R4: Páginas de Lista
+
+- [ ] 4.1 Header de Página
+  - [ ] Título + descripción
+  - [ ] Filtros search
+  - [ ] Botón principal CTA
+
+- [ ] 4.2 Tablas Mejoradas
+  - [ ] Filas con hover highlight
+  - [ ] Acciones en dropdown menu
+  - [ ] Paginación estilizada
+  - [ ] Bulk actions
+
+- [ ] 4.3 Empty States
+  - [ ] Ilustraciones placeholder
+  - [ ] Mensaje contextual
+  - [ ] CTA para crear
+
+### Fase R5: Formularios Premium
+
+- [ ] 5.1 Input Fields
+  - [ ] Labels flotantes
+  - [ ] Helper text
+  - [ ] Error states con shake
+  - [ ] Loading state
+
+- [ ] 5.2 Layout de Forms
+  - [ ] Secciones colapsables
+  - [ ] Multi-column en desktop
+  - [ ] Responsive stack en mobile
+
+- [ ] 5.3 Feedback UI
+  - [ ] Toast notifications estilizadas
+  - [ ] Progress indicators
+  - [ ] Success confirmations
+
+### Fase R6: Autenticación
+
+- [ ] 6.1 Login/Registro
+  - [ ] Card centrada con shadow
+  - [ ] Branding profesional
+  - [ ] Social login buttons (futuro)
+
+- [ ] 6.2 Estados de Carga
+  - [ ] Spinner consistente
+  - [ ] Skeleton screens
+  - [ ] Progressive loading
+
+---
+
+## Componentes a Crear/Actualizar
+
+### Nuevos Componentes (`src/components/ui/`)
+
+| Componente | Descripción | Prioridad |
+|------------|-------------|-----------|
+| `Button.tsx` | Sistema de botones | Alta |
+| `Input.tsx` | Input con validación visual | Alta |
+| `Card.tsx` | Card base con variantes | Alta |
+| `Badge.tsx` | Tags de estado | Media |
+| `Modal.tsx` | Modal con portal | Media |
+| `Table.tsx` | Tabla responsive | Media |
+| `Dropdown.tsx` | Menú dropdown | Media |
+| `Skeleton.tsx` | Loading skeleton | Baja |
+| `Avatar.tsx` | Avatar de usuario | Baja |
+| `Tooltip.tsx` | Tooltips informativos | Baja |
+
+### Hooks Útiles
+
+| Hook | Uso |
+|------|-----|
+| `useMediaQuery` | Responsive breakpoints |
+| `useCopyToClipboard` | Copiar al clipboard |
+| `useToast` | Notificaciones custom |
+
+---
+
+## Orden de Implementación Sugerido
+
+```
+1. globals.css + tailwind.config.ts
+2. Button, Input, Card (componentes base)
+3. Sidebar con iconos
+4. Dashboard stats cards
+5. Tablas mejoradas
+6. Forms premium
+7. Login/Registro
+8. Polish final
+```
+
+---
+
+## Checklist de Calidad
+
+- [ ] Sin emojis (solo SVGs)
+- [ ] Contraste WCAG AA (4.5:1 mínimo)
+- [ ] Hover states en todos los interactivos
+- [ ] Focus visible para keyboard nav
+- [ ] Touch targets 44x44px mínimo
+- [ ] Responsive en 375px, 768px, 1024px, 1440px
+- [ ] prefers-reduced-motion respetado
+- [ ] Loading states en datos async
+
+---
+
+*Última actualización: 2026-04-15*

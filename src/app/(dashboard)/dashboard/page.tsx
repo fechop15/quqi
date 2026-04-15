@@ -4,100 +4,115 @@ import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
-import Link from 'next/link';
+import { StatsCard, RevenueChart, QuickActions, RecentSales } from '@/components/dashboard';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { formatCurrency } from '@/lib/utils';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Venta } from '@/types/venta';
+import {
+  DollarSign,
+  Package,
+  TrendingUp,
+  TrendingDown,
+  Plus,
+  Calendar,
+} from 'lucide-react';
 
 interface DashboardStats {
-  ventasHoy: number;
+  ventasPeriodo: number;
   productosStock: number;
-  ingresosMes: number;
-  egresosMes: number;
+  ingresosPeriodo: number;
+  egresosPeriodo: number;
+}
+
+interface ChartData {
+  mes: string;
+  ingresos: number;
+  egresos: number;
+  balance: number;
 }
 
 export default function DashboardPage() {
   const { profile } = useAuth();
   const role = useRole();
   const [stats, setStats] = useState<DashboardStats>({
-    ventasHoy: 0,
+    ventasPeriodo: 0,
     productosStock: 0,
-    ingresosMes: 0,
-    egresosMes: 0,
+    ingresosPeriodo: 0,
+    egresosPeriodo: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [ultimasVentas, setUltimasVentas] = useState<Venta[]>([]);
+  const [periodo, setPeriodo] = useState<'anio' | 'mes'>('anio');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        // Ventas hoy
         const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const manana = new Date(hoy);
-        manana.setDate(manana.getDate() + 1);
+        const productosSnapshot = await getDocs(collection(db, 'productos'));
+        const productosStock = productosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().stock || 0), 0);
+
+        let fechaInicio: Date;
+        let fechaFin: Date;
+        let chartMeses: number;
+
+        if (periodo === 'mes') {
+          fechaInicio = new Date(selectedYear, selectedMonth, 1);
+          fechaFin = new Date(selectedYear, selectedMonth + 1, 0);
+          chartMeses = 6;
+        } else {
+          fechaInicio = new Date(selectedYear, 0, 1);
+          fechaFin = new Date(selectedYear, 11, 31);
+          chartMeses = 12;
+        }
 
         const ventasQuery = query(
           collection(db, 'ventas'),
-          where('fecha', '>=', hoy),
-          where('fecha', '<', manana)
+          where('fecha', '>=', fechaInicio.toISOString().split('T')[0]),
+          where('fecha', '<=', fechaFin.toISOString().split('T')[0])
         );
         const ventasSnapshot = await getDocs(ventasQuery);
-        const ventasHoy = ventasSnapshot.docs.reduce((sum, doc) => {
-          const data = doc.data();
-          return sum + (data.total || 0);
-        }, 0);
+        const ventasPeriodo = ventasSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
 
-        // Productos en stock
-        const productosSnapshot = await getDocs(collection(db, 'productos'));
-        const productosStock = productosSnapshot.docs.reduce((sum, doc) => {
-          const data = doc.data();
-          return sum + (data.stock || 0);
-        }, 0);
-
-        // Ingresos del mes
-        const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
         const ingresosQuery = query(
           collection(db, 'ingresos'),
-          where('fecha', '>=', primerDiaMes.toISOString().split('T')[0])
+          where('fecha', '>=', fechaInicio.toISOString().split('T')[0]),
+          where('fecha', '<=', fechaFin.toISOString().split('T')[0])
         );
         const ingresosSnapshot = await getDocs(ingresosQuery);
-        const ingresosMes = ingresosSnapshot.docs.reduce((sum, doc) => {
-          const data = doc.data();
-          return sum + (data.monto || 0);
-        }, 0);
+        const ingresosPeriodo = ingresosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
 
-        // Egresos del mes
         const egresosQuery = query(
           collection(db, 'egresos'),
-          where('fecha', '>=', primerDiaMes.toISOString().split('T')[0])
+          where('fecha', '>=', fechaInicio.toISOString().split('T')[0]),
+          where('fecha', '<=', fechaFin.toISOString().split('T')[0])
         );
         const egresosSnapshot = await getDocs(egresosQuery);
-        const egresosMes = egresosSnapshot.docs.reduce((sum, doc) => {
-          const data = doc.data();
-          return sum + (data.monto || 0);
-        }, 0);
+        const egresosPeriodo = egresosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
 
         setStats({
-          ventasHoy,
+          ventasPeriodo,
           productosStock,
-          ingresosMes,
-          egresosMes,
+          ingresosPeriodo,
+          egresosPeriodo,
         });
 
-        // Datos para el gráfico (últimos 6 meses)
-        const mesesData: any[] = [];
-        for (let i = 5; i >= 0; i--) {
-          const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+        const mesesData: ChartData[] = [];
+        const startMonth = periodo === 'mes' ? selectedMonth : 0;
+        const monthsToShow = periodo === 'mes' ? 6 : 12;
+
+        for (let i = 0; i < monthsToShow; i++) {
+          const monthOffset = periodo === 'mes' ? i - 3 : i;
+          const fecha = new Date(selectedYear, startMonth + monthOffset, 1);
+          if (fecha.getFullYear() !== selectedYear) continue;
+
           const mesNombre = fecha.toLocaleDateString('es-ES', { month: 'short' });
-          
           const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
           const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
 
-          // Ingresos del mes
           const ingQuery = query(
             collection(db, 'ingresos'),
             where('fecha', '>=', primerDia.toISOString().split('T')[0]),
@@ -106,7 +121,6 @@ export default function DashboardPage() {
           const ingSnapshot = await getDocs(ingQuery);
           const ingTotal = ingSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
 
-          // Egresos del mes
           const egrQuery = query(
             collection(db, 'egresos'),
             where('fecha', '>=', primerDia.toISOString().split('T')[0]),
@@ -124,7 +138,6 @@ export default function DashboardPage() {
         }
         setChartData(mesesData);
 
-        // Últimas ventas
         const ventasRecientesQuery = query(
           collection(db, 'ventas'),
           orderBy('fecha', 'desc'),
@@ -143,158 +156,184 @@ export default function DashboardPage() {
       }
     }
 
+    setLoading(true);
     fetchStats();
-  }, []);
+  }, [periodo, selectedYear, selectedMonth]);
 
-  const statsData = [
-    { label: 'Ventas hoy', value: formatCurrency(stats.ventasHoy), icon: '💰', color: 'blue' },
-    { label: 'Productos en stock', value: stats.productosStock.toString(), icon: '📦', color: 'gray' },
-    { label: 'Ingresos del mes', value: formatCurrency(stats.ingresosMes), icon: '📈', color: 'green' },
-    { label: 'Egresos del mes', value: formatCurrency(stats.egresosMes), icon: '📉', color: 'red' },
+  const balance = stats.ingresosPeriodo - stats.egresosPeriodo;
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const meses = [
+    { value: 0, label: 'Enero' },
+    { value: 1, label: 'Febrero' },
+    { value: 2, label: 'Marzo' },
+    { value: 3, label: 'Abril' },
+    { value: 4, label: 'Mayo' },
+    { value: 5, label: 'Junio' },
+    { value: 6, label: 'Julio' },
+    { value: 7, label: 'Agosto' },
+    { value: 8, label: 'Septiembre' },
+    { value: 9, label: 'Octubre' },
+    { value: 10, label: 'Noviembre' },
+    { value: 11, label: 'Diciembre' },
   ];
 
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return '-';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  };
+  const quickActions: { label: string; href: string; icon: React.ReactNode; variant: 'primary' | 'success' | 'warning' }[] = [
+    { label: 'Nueva venta', href: '/ventas/nueva', icon: <Plus className="h-4 w-4" />, variant: 'primary' },
+    { label: 'Nuevo producto', href: '/productos/nuevo', icon: <Package className="h-4 w-4" />, variant: 'success' },
+  ];
 
-  const balance = stats.ingresosMes - stats.egresosMes;
+  if (role.isAdmin() || role.isGerente()) {
+    quickActions.push(
+      { label: 'Registrar ingreso', href: '/ingresos/nuevo', icon: <TrendingUp className="h-4 w-4" />, variant: 'success' },
+      { label: 'Registrar egreso', href: '/egresos/nuevo', icon: <TrendingDown className="h-4 w-4" />, variant: 'warning' }
+    );
+  }
+
+  if (loading) {
+    return (
+      <ProtectedRoute requiredRoles={['admin', 'gerente', 'vendedor']}>
+        <div className="space-y-6">
+          <div className="h-32 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#4f46e5] animate-pulse" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-28 rounded-xl bg-white border border-[#e2e8f0] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRoles={['admin', 'gerente', 'vendedor']}>
-      <div>
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">
-          Bienvenido, {profile?.nombre}
-        </h1>
-
-        {/* Balance del mes */}
-        <div className="mb-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white shadow-lg">
-          <p className="text-sm opacity-90">Balance del mes</p>
-          <p className="text-4xl font-bold">{formatCurrency(balance)}</p>
-          <p className="mt-2 text-sm">
-            {balance >= 0 ? '✅' : '⚠️'} {balance >= 0 ? 'Positivo' : 'Negativo'}
-          </p>
-        </div>
-
-        {/* Stats cards */}
-        <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {statsData.map((stat) => (
-            <div key={stat.label} className="rounded-lg bg-white p-6 shadow-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                </div>
-                <span className="text-4xl">{stat.icon}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Gráfico de ingresos vs egresos */}
-        {chartData.length > 0 && (
-          <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Ingresos vs Egresos (Últimos 6 meses)</h2>
-            <div className="h-80 w-full min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: any) => formatCurrency(Number(value))}
-                    contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb' }}
-                  />
-                  <Legend />
-                  <Bar dataKey="ingresos" fill="#10b981" name="Ingresos" />
-                  <Bar dataKey="egresos" fill="#ef4444" name="Egresos" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {/* Accesos rápidos y últimas ventas */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Accesos rápidos</h2>
-            <div className="space-y-2">
-              <Link
-                href="/ventas/nueva"
-                className="block rounded-md bg-blue-50 px-4 py-2 text-blue-600 hover:bg-blue-100"
-              >
-                ➕ Nueva venta
-              </Link>
-              <Link
-                href="/productos/nuevo"
-                className="block rounded-md bg-green-50 px-4 py-2 text-green-600 hover:bg-green-100"
-              >
-                📦 Nuevo producto
-              </Link>
-              {(role.isAdmin() || role.isGerente()) && (
-                <>
-                  <Link
-                    href="/ingresos/nuevo"
-                    className="block rounded-md bg-emerald-50 px-4 py-2 text-emerald-600 hover:bg-emerald-100"
-                  >
-                    📈 Registrar ingreso
-                  </Link>
-                  <Link
-                    href="/egresos/nuevo"
-                    className="block rounded-md bg-red-50 px-4 py-2 text-red-600 hover:bg-red-100"
-                  >
-                    📉 Registrar egreso
-                  </Link>
-                </>
-              )}
-            </div>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-[#1e293b]">
+              Bienvenido, {profile?.nombre}
+            </h1>
+            <p className="mt-1 text-sm text-[#475569]">
+              Este es tu resumen financiero
+            </p>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Últimas ventas</h2>
-            {ultimasVentas.length === 0 ? (
-              <p className="text-sm text-gray-500">No hay ventas recientes</p>
-            ) : (
-              <div className="space-y-3">
-                {ultimasVentas.map((venta) => (
-                  <Link
-                    key={venta.id}
-                    href={`/ventas/${venta.id}`}
-                    className="block rounded-md border border-gray-200 p-3 hover:bg-gray-50"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-gray-900">{venta.cliente || 'Mostrador'}</p>
-                        <p className="text-sm text-gray-500">
-                          {formatDate(venta.fecha)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-green-600">{formatCurrency(venta.total)}</p>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                            venta.estado === 'completada'
-                              ? 'bg-green-100 text-green-800'
-                              : venta.estado === 'cancelada'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                        >
-                          {venta.estado}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+          <div className="flex items-center gap-3">
+            <div className="flex bg-white border border-[#e2e8f0] rounded-lg overflow-hidden">
+              <button
+                onClick={() => setPeriodo('anio')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  periodo === 'anio'
+                    ? 'bg-[#6366f1] text-white'
+                    : 'bg-white text-[#64748b] hover:bg-[#f8fafc]'
+                }`}
+              >
+                Año
+              </button>
+              <button
+                onClick={() => setPeriodo('mes')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  periodo === 'mes'
+                    ? 'bg-[#6366f1] text-white'
+                    : 'bg-white text-[#64748b] hover:bg-[#f8fafc]'
+                }`}
+              >
+                Mes
+              </button>
+            </div>
+
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="px-3 py-2 text-sm border border-[#e2e8f0] rounded-lg bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#6366f1]"
+            >
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
+            {periodo === 'mes' && (
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="px-3 py-2 text-sm border border-[#e2e8f0] rounded-lg bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#6366f1]"
+              >
+                {meses.map((mes) => (
+                  <option key={mes.value} value={mes.value}>
+                    {mes.label}
+                  </option>
                 ))}
-              </div>
+              </select>
             )}
           </div>
+        </div>
+
+        <div className="rounded-xl bg-gradient-to-br from-[#6366f1] to-[#4f46e5] p-6 shadow-lg">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-white/80">
+                Balance {periodo === 'mes' ? `de ${meses[selectedMonth].label}` : `del ${selectedYear}`}
+              </p>
+              <p className="mt-2 text-4xl font-bold text-white">
+                {formatCurrency(balance)}
+              </p>
+              <p className={`mt-2 flex items-center gap-1 text-sm ${balance >= 0 ? 'text-white/80' : 'text-red-200'}`}>
+                {balance >= 0 ? (
+                  <>
+                    <TrendingUp className="h-4 w-4" />
+                    Tendencia positiva
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="h-4 w-4" />
+                    Requiere atención
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="hidden sm:flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+              <DollarSign className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            label={`Ventas (${periodo === 'mes' ? 'mes' : 'año'})`}
+            value={formatCurrency(stats.ventasPeriodo)}
+            icon={<DollarSign className="h-6 w-6" />}
+            variant="primary"
+          />
+          <StatsCard
+            label="Productos en stock"
+            value={stats.productosStock.toLocaleString()}
+            icon={<Package className="h-6 w-6" />}
+            variant="success"
+          />
+          <StatsCard
+            label={`Ingresos (${periodo === 'mes' ? 'mes' : 'año'})`}
+            value={formatCurrency(stats.ingresosPeriodo)}
+            icon={<TrendingUp className="h-6 w-6" />}
+            variant="success"
+          />
+          <StatsCard
+            label={`Egresos (${periodo === 'mes' ? 'mes' : 'año'})`}
+            value={formatCurrency(stats.egresosPeriodo)}
+            icon={<TrendingDown className="h-6 w-6" />}
+            variant="danger"
+          />
+        </div>
+
+        {chartData.length > 0 && (
+          <RevenueChart data={chartData} />
+        )}
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <QuickActions actions={quickActions} />
+          <RecentSales sales={ultimasVentas} />
         </div>
       </div>
     </ProtectedRoute>
