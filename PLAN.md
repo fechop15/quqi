@@ -30,47 +30,72 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ## Fases de Desarrollo
 
-### Fase 1: Configuración e Infraestructura
+### Fase 1: Configuración e Infraestructura ✅ COMPLETADA
 
-- [ ] 1.1 Configurar Firebase en el proyecto
-  - [ ] Crear proyecto en Firebase Console
-  - [ ] Habilitar Authentication (Email/Password)
-  - [ ] Habilitar Firestore Database
-  - [ ] Configurar variables de entorno (.env.local)
-  - [ ] Crear utilitario de conexión `src/lib/firebase.ts`
+- [x] 1.1 Configurar Firebase en el proyecto
+  - [x] Crear proyecto en Firebase Console (quqi-3ecdf)
+  - [x] Habilitar Authentication (Email/Password)
+  - [x] Habilitar Firestore Database
+  - [x] Configurar variables de entorno (.env.local)
+  - [x] Crear utilitario de conexión `src/lib/firebase.ts`
 
-- [ ] 1.2 Configurar contexto de autenticación
-  - [ ] `src/contexts/AuthContext.tsx` - Proveedor de autenticación
-  - [ ] Hooks personalizados `useAuth`
-  - [ ] Types para usuario y roles
+- [x] 1.2 Configurar contexto de autenticación
+  - [x] `src/contexts/AuthContext.tsx` - Proveedor de autenticación
+  - [x] Hooks personalizados `useAuth`
+  - [x] Types para usuario y roles
 
-- [ ] 1.3 Sistema de rutas protegidas
-  - [ ] HOC `withAuth` para proteger páginas
-  - [ ] Middleware para redirección por roles
-  - [ ] Página de login `/login`
-  - [ ] Página de registro `/registro`
-
----
-
-### Fase 2: Autenticación y Autorización
-
-- [ ] 2.1 Componentes de autenticación
-  - [ ] `src/components/auth/LoginForm.tsx`
-  - [ ] `src/components/auth/RegisterForm.tsx`
-  - [ ] `src/components/auth/ProtectedRoute.tsx`
-
-- [ ] 2.2 Gestión de roles
-  - [ ] Colección `users` en Firestore con campo `role`
-  - [ ] Función `checkRole(requiredRoles: string[])`
-  - [ ] Componente `RoleGuard` para proteger UI por rol
-
-- [ ] 2.3 Perfil de usuario
-  - [ ] Página `/perfil` - Ver/editar datos
-  - [ ] Cerrar sesión
+- [x] 1.3 Sistema de rutas protegidas
+  - [x] Middleware para protección de rutas
+  - [x] Página de login `/login`
+  - [x] Página de registro `/registro`
 
 ---
 
-### Fase 4: Módulo de Productos e Inventario
+### Fase 2: Autenticación y Autorización ✅ COMPLETADA
+
+- [x] 2.1 Componentes de autenticación
+  - [x] `src/components/auth/LoginForm.tsx`
+  - [x] `src/components/auth/RegisterForm.tsx`
+  - [x] `src/components/auth/ProtectedRoute.tsx`
+
+- [x] 2.2 Gestión de roles
+  - [x] Colección `users` en Firestore con campo `role`
+  - [x] Función `checkRole(requiredRoles: string[])`
+  - [x] Componente `RoleGuard` para proteger UI por rol
+
+- [x] 2.3 Perfil de usuario
+  - [x] Cerrar sesión implementado
+  - [ ] Página `/perfil` - Ver/editar datos (pendiente)
+
+---
+
+---
+
+### Fase 3: Módulo de Productos ✅ PARCIALMENTE COMPLETADA
+
+- [x] 3.1 Modelo de datos
+  - [x] `src/types/producto.ts` - Interfaz Producto
+
+- [x] 3.2 Listado de productos
+  - [x] `src/app/productos/page.tsx` - Página principal
+  - [x] `src/components/productos/ProductoList.tsx` - Tabla con búsqueda y filtros
+  - [x] Alerta visual de stock bajo
+
+- [x] 3.3 Crear productos
+  - [x] `src/app/productos/nuevo/page.tsx` - Página de creación (Admin, Gerente)
+  - [x] `src/components/productos/ProductoForm.tsx` - Formulario con validación
+
+- [ ] 3.4 Editar/Eliminar productos
+  - [ ] `src/app/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
+  - [ ] Función eliminar en ProductoList
+
+- [ ] 3.5 Gestión de inventario
+  - [ ] Historial de movimientos de inventario
+  - [ ] `src/app/inventario/movimientos/page.tsx`
+
+---
+
+### Fase 4: Módulo de Ingresos
 
 - [ ] 4.1 Modelo de datos
   ```typescript
@@ -105,22 +130,32 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ---
 
-### Fase 5: Módulo de Ingresos
+### Fase 5: Módulo de Ventas ✅ PARCIALMENTE COMPLETADA
 
-- [ ] 3.1 Modelo de datos
-  ```typescript
-  interface Ingreso {
-    id: string;
-    monto: number;
-    descripcion: string;
-    fecha: string;
-    categoria: string;
-    creadoPor: string;
-    createdAt: Timestamp;
-  }
-  ```
+- [x] 5.1 Modelo de datos
+  - [x] `src/types/venta.ts` - Interfaces Venta y VentaItem
 
-- [ ] 3.2 CRUD de ingresos
+- [x] 5.2 Listado de ventas
+  - [x] `src/app/ventas/page.tsx` - Página principal
+  - [x] `src/components/ventas/VentaList.tsx` - Tabla con estados
+
+- [x] 5.3 Crear ventas
+  - [x] `src/app/ventas/nueva/page.tsx` - Página de creación
+  - [x] `src/components/ventas/VentaForm.tsx` - Formulario con carrito de productos
+  - [x] Descuento automático de stock al registrar venta
+
+- [ ] 5.4 Detalle y edición
+  - [ ] `src/app/ventas/[id]/page.tsx` - Ver detalle
+  - [ ] Función cancelar venta (Admin, Gerente)
+
+---
+
+### Fase 6: Módulo de Ingresos
+
+- [ ] 6.1 Modelo de datos
+  - [ ] `src/types/ingreso.ts` (creado, falta implementar CRUD)
+
+- [ ] 6.2 CRUD de ingresos
   - [ ] `src/app/ingresos/page.tsx` - Listado (Admin, Gerente)
   - [ ] `src/app/ingresos/nuevo/page.tsx` - Crear (Admin, Gerente)
   - [ ] `src/app/ingresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
@@ -129,22 +164,12 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ---
 
-### Fase 6: Módulo de Egresos
+### Fase 7: Módulo de Egresos
 
-- [ ] 4.1 Modelo de datos
-  ```typescript
-  interface Egreso {
-    id: string;
-    monto: number;
-    descripcion: string;
-    fecha: string;
-    categoria: string;
-    creadoPor: string;
-    createdAt: Timestamp;
-  }
-  ```
+- [ ] 7.1 Modelo de datos
+  - [ ] `src/types/egreso.ts` (creado, falta implementar CRUD)
 
-- [ ] 4.2 CRUD de egresos
+- [ ] 7.2 CRUD de egresos
   - [ ] `src/app/egresos/page.tsx` - Listado (Admin, Gerente)
   - [ ] `src/app/egresos/nuevo/page.tsx` - Crear (Admin, Gerente)
   - [ ] `src/app/egresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
@@ -153,54 +178,22 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ---
 
-### Fase 7: Módulo de Ventas
-
-- [ ] 5.1 Modelo de datos
-  ```typescript
-  interface Venta {
-    id: string;
-    total: number;
-    items: VentaItem[];
-    cliente?: string;
-    vendedorId: string;
-    fecha: Timestamp;
-    estado: 'pendiente' | 'completada' | 'cancelada';
-  }
-  
-  interface VentaItem {
-    producto: string;
-    cantidad: number;
-    precioUnitario: number;
-    subtotal: number;
-  }
-  ```
-
-- [ ] 5.2 CRUD de ventas
-  - [ ] `src/app/ventas/page.tsx` - Listado
-    - Admin/Gerente: ven todas
-    - Vendedor: solo las suyas
-  - [ ] `src/app/ventas/nueva/page.tsx` - Crear venta
-  - [ ] `src/app/ventas/[id]/page.tsx` - Detalle
-  - [ ] `src/components/ventas/VentaList.tsx`
-  - [ ] `src/components/ventas/VentaForm.tsx`
-  - [ ] `src/components/ventas/VentaItems.tsx`
-
----
-
 ### Fase 8: Dashboard y Reportes
 
-- [ ] 6.1 Dashboard principal
-  - [ ] `src/app/dashboard/page.tsx`
+- [x] 8.1 Dashboard principal
+  - [x] `src/app/dashboard/page.tsx` - Vista inicial con acceso rápido
+
+- [ ] 8.2 Reportes con datos reales
   - [ ] Cards con totales (ingresos, egresos, balance)
   - [ ] Gráfico de ingresos vs egresos (recharts)
-  - [ ] Últimas ventas
+  - [ ] Últimas ventas reales
 
-- [ ] 6.2 Reportes por rol
+- [ ] 8.3 Reportes por rol
   - [ ] Admin: todos los reportes, filtros por fecha/usuario
   - [ ] Gerente: reportes generales
   - [ ] Vendedor: solo sus estadísticas
 
-- [ ] 6.3 Exportar reportes
+- [ ] 8.4 Exportar reportes
   - [ ] Exportar a CSV
   - [ ] Exportar a PDF (opcional)
 
@@ -208,7 +201,7 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ### Fase 9: Gestión de Usuarios (Solo Admin)
 
-- [ ] 7.1 CRUD de usuarios
+- [ ] 9.1 CRUD de usuarios
   - [ ] `src/app/usuarios/page.tsx` - Listado
   - [ ] `src/app/usuarios/nuevo/page.tsx` - Crear
   - [ ] `src/app/usuarios/[id]/editar/page.tsx` - Editar rol
@@ -363,13 +356,12 @@ npm install -D @types/firebase
 
 ## Próximos Pasos Inmediatos
 
-1. [ ] Crear proyecto en Firebase Console
-2. [ ] Obtener credenciales de Firebase
-3. [ ] Instalar dependencias (`firebase`, `recharts`)
-4. [ ] Configurar `src/lib/firebase.ts`
-5. [ ] Crear `AuthContext` y hooks
-6. [ ] Implementar login/registro
-7. [ ] Configurar reglas de seguridad en Firestore
+- [ ] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
+- [ ] Editar producto: `src/app/productos/[id]/editar/page.tsx`
+- [ ] Ver detalle de venta: `src/app/ventas/[id]/page.tsx`
+- [ ] Conectar dashboard con datos reales de Firestore
+- [ ] Implementar CRUD de ingresos (`/ingresos`)
+- [ ] Implementar CRUD de egresos (`/egresos`)
 
 ---
 
