@@ -150,43 +150,48 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ---
 
-### Fase 6: Módulo de Ingresos
+### Fase 6: Módulo de Ingresos ✅ COMPLETADA
 
-- [ ] 6.1 Modelo de datos
-  - [ ] `src/types/ingreso.ts` (creado, falta implementar CRUD)
+- [x] 6.1 Modelo de datos
+  - [x] `src/types/ingreso.ts`
 
-- [ ] 6.2 CRUD de ingresos
-  - [ ] `src/app/ingresos/page.tsx` - Listado (Admin, Gerente)
-  - [ ] `src/app/ingresos/nuevo/page.tsx` - Crear (Admin, Gerente)
-  - [ ] `src/app/ingresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
-  - [ ] `src/components/ingresos/IngresoList.tsx`
-  - [ ] `src/components/ingresos/IngresoForm.tsx`
+- [x] 6.2 CRUD de ingresos
+  - [x] `src/app/ingresos/page.tsx` - Listado con total acumulado (Admin, Gerente)
+  - [x] `src/app/ingresos/nuevo/page.tsx` - Crear (Admin, Gerente)
+  - [x] `src/components/ingresos/IngresoList.tsx`
+  - [x] `src/components/ingresos/IngresoForm.tsx`
 
----
-
-### Fase 7: Módulo de Egresos
-
-- [ ] 7.1 Modelo de datos
-  - [ ] `src/types/egreso.ts` (creado, falta implementar CRUD)
-
-- [ ] 7.2 CRUD de egresos
-  - [ ] `src/app/egresos/page.tsx` - Listado (Admin, Gerente)
-  - [ ] `src/app/egresos/nuevo/page.tsx` - Crear (Admin, Gerente)
-  - [ ] `src/app/egresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
-  - [ ] `src/components/egresos/EgresoList.tsx`
-  - [ ] `src/components/egresos/EgresoForm.tsx`
+- [ ] 6.3 Editar/Eliminar ingresos
+  - [ ] `src/app/ingresos/[id]/editar/page.tsx`
 
 ---
 
-### Fase 8: Dashboard y Reportes
+### Fase 7: Módulo de Egresos ✅ COMPLETADA
+
+- [x] 7.1 Modelo de datos
+  - [x] `src/types/egreso.ts`
+
+- [x] 7.2 CRUD de egresos
+  - [x] `src/app/egresos/page.tsx` - Listado con total acumulado (Admin, Gerente)
+  - [x] `src/app/egresos/nuevo/page.tsx` - Crear (Admin, Gerente)
+  - [x] `src/components/egresos/EgresoList.tsx`
+  - [x] `src/components/egresos/EgresoForm.tsx`
+
+- [ ] 7.3 Editar/Eliminar egresos
+  - [ ] `src/app/egresos/[id]/editar/page.tsx`
+
+---
+
+### Fase 8: Dashboard y Reportes ✅ PARCIALMENTE COMPLETADA
 
 - [x] 8.1 Dashboard principal
-  - [x] `src/app/dashboard/page.tsx` - Vista inicial con acceso rápido
+  - [x] `src/app/dashboard/page.tsx` - Vista inicial con datos reales
+  - [x] Balance del mes en tiempo real
+  - [x] Cards con: ventas hoy, productos en stock, ingresos del mes, egresos del mes
 
-- [ ] 8.2 Reportes con datos reales
-  - [ ] Cards con totales (ingresos, egresos, balance)
+- [ ] 8.2 Gráficos y visualizaciones
   - [ ] Gráfico de ingresos vs egresos (recharts)
-  - [ ] Últimas ventas reales
+  - [ ] Últimas ventas recientes
 
 - [ ] 8.3 Reportes por rol
   - [ ] Admin: todos los reportes, filtros por fecha/usuario
@@ -358,10 +363,12 @@ npm install -D @types/firebase
 
 - [ ] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
 - [ ] Editar producto: `src/app/productos/[id]/editar/page.tsx`
+- [ ] Eliminar producto (Admin)
 - [ ] Ver detalle de venta: `src/app/ventas/[id]/page.tsx`
-- [ ] Conectar dashboard con datos reales de Firestore
-- [ ] Implementar CRUD de ingresos (`/ingresos`)
-- [ ] Implementar CRUD de egresos (`/egresos`)
+- [ ] Cancelar venta (Admin, Gerente)
+- [ ] Editar/Eliminar ingresos y egresos
+- [ ] Agregar gráficos al dashboard (recharts)
+- [ ] Página de usuarios (Admin)
 
 ---
 
