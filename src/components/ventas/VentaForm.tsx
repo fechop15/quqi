@@ -109,6 +109,7 @@ export function VentaForm() {
         vendedorNombre: profile?.nombre,
         estado: 'completada' as const,
         fecha: serverTimestamp(),
+        fechaString: new Date().toISOString().split('T')[0],
         createdAt: serverTimestamp(),
       };
 

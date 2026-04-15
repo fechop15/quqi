@@ -16,6 +16,7 @@ import {
   User,
   LogOut,
   ChevronRight,
+  FileText,
 } from 'lucide-react';
 
 interface NavItem {
@@ -27,6 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { href: '/reportes', label: 'Reportes', icon: <FileText className="h-5 w-5" />, roles: ['admin', 'gerente'] },
   { href: '/ventas', label: 'Ventas', icon: <ShoppingCart className="h-5 w-5" /> },
   { href: '/productos', label: 'Productos', icon: <Package className="h-5 w-5" /> },
   { href: '/inventario/movimientos', label: 'Inventario', icon: <ClipboardList className="h-5 w-5" />, roles: ['admin', 'gerente'] },

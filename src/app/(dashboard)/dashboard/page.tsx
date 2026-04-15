@@ -69,13 +69,16 @@ export default function DashboardPage() {
           chartMeses = 12;
         }
 
-        const ventasQuery = query(
-          collection(db, 'ventas'),
-          where('fecha', '>=', fechaInicio.toISOString().split('T')[0]),
-          where('fecha', '<=', fechaFin.toISOString().split('T')[0])
-        );
+        const ventasQuery = query(collection(db, 'ventas'));
         const ventasSnapshot = await getDocs(ventasQuery);
-        const ventasPeriodo = ventasSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
+        const ventasPeriodo = ventasSnapshot.docs.reduce((sum, doc) => {
+          const data = doc.data();
+          const fechaStr = data.fechaString || (data.fecha?.toDate ? data.fecha.toDate().toISOString().split('T')[0] : '');
+          if (fechaStr >= fechaInicio.toISOString().split('T')[0] && fechaStr <= fechaFin.toISOString().split('T')[0]) {
+            return sum + (data.total || 0);
+          }
+          return sum;
+        }, 0);
 
         const ingresosQuery = query(
           collection(db, 'ingresos'),
@@ -160,7 +163,7 @@ export default function DashboardPage() {
     fetchStats();
   }, [periodo, selectedYear, selectedMonth]);
 
-  const balance = stats.ingresosPeriodo - stats.egresosPeriodo;
+  const balance = stats.ingresosPeriodo + stats.ventasPeriodo - stats.egresosPeriodo;
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -275,7 +278,7 @@ export default function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-white/80">
-                Balance {periodo === 'mes' ? `de ${meses[selectedMonth].label}` : `del ${selectedYear}`}
+                Dinero Disponible {periodo === 'mes' ? `de ${meses[selectedMonth].label}` : `del ${selectedYear}`}
               </p>
               <p className="mt-2 text-4xl font-bold text-white">
                 {formatCurrency(balance)}
@@ -284,12 +287,12 @@ export default function DashboardPage() {
                 {balance >= 0 ? (
                   <>
                     <TrendingUp className="h-4 w-4" />
-                    Tendencia positiva
+                    Ingresos + Ventas - Egresos
                   </>
                 ) : (
                   <>
                     <TrendingDown className="h-4 w-4" />
-                    Requiere atención
+                    Egresos superan ingresos
                   </>
                 )}
               </p>
