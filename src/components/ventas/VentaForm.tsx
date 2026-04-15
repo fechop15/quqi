@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, serverTimestamp, getDocs, query, where, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -113,12 +113,30 @@ export function VentaForm() {
 
       const ventaRef = await addDoc(collection(db, 'ventas'), ventaData);
 
-      // Actualizar stock de cada producto
+      // Actualizar stock y registrar movimientos
       const batchPromises = items.map(async (item) => {
         const productoRef = doc(db, 'productos', item.productoId);
+        const productoDoc = await getDoc(productoRef);
+        const stockAnterior = productoDoc.exists() ? productoDoc.data().stock || 0 : 0;
+        const stockNuevo = stockAnterior - item.cantidad;
+
         await updateDoc(productoRef, {
-          stock: increment(-item.cantidad),
+          stock: stockNuevo,
           updatedAt: serverTimestamp(),
+        });
+
+        // Registrar movimiento de salida
+        await addDoc(collection(db, 'movimientos_inventario'), {
+          productoId: item.productoId,
+          productoNombre: item.producto,
+          tipo: 'salida',
+          cantidad: item.cantidad,
+          stockAnterior,
+          stockNuevo,
+          motivo: `Venta ${ventaRef.id.slice(0, 8)}`,
+          usuarioId: user.uid,
+          usuarioNombre: profile?.nombre || 'Desconocido',
+          createdAt: serverTimestamp(),
         });
       });
 

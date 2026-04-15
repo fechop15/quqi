@@ -10,9 +10,11 @@ const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
   { href: '/ventas', label: 'Ventas', icon: '💰' },
   { href: '/productos', label: 'Productos', icon: '📦' },
+  { href: '/inventario/movimientos', label: 'Inventario', icon: '📋', roles: ['admin', 'gerente'] },
   { href: '/ingresos', label: 'Ingresos', icon: '📈', roles: ['admin', 'gerente'] },
   { href: '/egresos', label: 'Egresos', icon: '📉', roles: ['admin', 'gerente'] },
   { href: '/usuarios', label: 'Usuarios', icon: '👥', roles: ['admin'] },
+  { href: '/perfil', label: 'Mi Perfil', icon: '👤' },
 ];
 
 export default function DashboardLayout({
