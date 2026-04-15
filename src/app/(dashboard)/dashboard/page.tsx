@@ -201,7 +201,7 @@ export default function DashboardPage() {
         {chartData.length > 0 && (
           <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Ingresos vs Egresos (Últimos 6 meses)</h2>
-            <div className="h-80">
+            <div className="h-80 w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />

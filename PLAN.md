@@ -297,7 +297,7 @@ service cloud.firestore {
     }
 
     function getUserRole() {
-      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
     function hasRole(requiredRoles) {
@@ -314,9 +314,11 @@ service cloud.firestore {
     }
 
     // Usuarios (perfiles del sistema)
-    match /usuarios/{userId} {
+    match /users/{userId} {
       allow read: if isLoggedIn();
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+      // Los usuarios pueden actualizar su propio perfil
       allow update: if isLoggedIn() && request.auth.uid == userId;
     }
 

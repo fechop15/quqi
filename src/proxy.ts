@@ -7,7 +7,7 @@ const publicRoutes = ['/login', '/registro'];
 // Rutas que requieren autenticación
 const protectedRoutes = ['/dashboard', '/ventas', '/productos', '/ingresos', '/egresos', '/usuarios'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Verificar si es una ruta pública
