@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Producto } from '@/types/producto';
 import { useRole } from '@/hooks/useRole';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export function ProductoList() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -49,6 +51,21 @@ export function ProductoList() {
   );
 
   const stockBajo = (producto: Producto) => producto.stock <= producto.stockMinimo;
+
+  const handleDelete = async (id: string, nombre: string) => {
+    if (!confirm(`¿Estás seguro de eliminar "${nombre}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'productos', id));
+      setProductos(productos.filter((p) => p.id !== id));
+      toast.success('Producto eliminado exitosamente');
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      toast.error('Error al eliminar el producto');
+    }
+  };
 
   if (loading) {
     return <div className="text-center py-8">Cargando productos...</div>;
@@ -127,9 +144,19 @@ export function ProductoList() {
                   </td>
                   {(role.isGerente() || role.isAdmin()) && (
                     <td className="px-4 py-3 text-sm">
-                      <button className="text-blue-600 hover:text-blue-800 mr-3">Editar</button>
+                      <Link
+                        href={`/productos/${producto.id}/editar`}
+                        className="text-blue-600 hover:text-blue-800 mr-3"
+                      >
+                        Editar
+                      </Link>
                       {role.isAdmin() && (
-                        <button className="text-red-600 hover:text-red-800">Eliminar</button>
+                        <button
+                          onClick={() => handleDelete(producto.id, producto.nombre)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Eliminar
+                        </button>
                       )}
                     </td>
                   )}

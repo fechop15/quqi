@@ -85,9 +85,9 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
   - [x] `src/app/productos/nuevo/page.tsx` - Página de creación (Admin, Gerente)
   - [x] `src/components/productos/ProductoForm.tsx` - Formulario con validación
 
-- [ ] 3.4 Editar/Eliminar productos
-  - [ ] `src/app/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
-  - [ ] Función eliminar en ProductoList
+- [x] 3.4 Editar/Eliminar productos ✅ COMPLETADA
+  - [x] `src/app/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
+  - [x] Función eliminar en ProductoList (solo Admin)
 
 - [ ] 3.5 Gestión de inventario
   - [ ] Historial de movimientos de inventario
@@ -362,8 +362,6 @@ npm install -D @types/firebase
 ## Próximos Pasos Inmediatos
 
 - [ ] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
-- [ ] Editar producto: `src/app/productos/[id]/editar/page.tsx`
-- [ ] Eliminar producto (Admin)
 - [ ] Ver detalle de venta: `src/app/ventas/[id]/page.tsx`
 - [ ] Cancelar venta (Admin, Gerente)
 - [ ] Editar/Eliminar ingresos y egresos
