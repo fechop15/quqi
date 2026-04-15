@@ -5,8 +5,10 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import Link from 'next/link';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Venta } from '@/types/venta';
 
 interface DashboardStats {
   ventasHoy: number;
@@ -25,6 +27,8 @@ export default function DashboardPage() {
     egresosMes: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [ultimasVentas, setUltimasVentas] = useState<Venta[]>([]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -82,6 +86,55 @@ export default function DashboardPage() {
           ingresosMes,
           egresosMes,
         });
+
+        // Datos para el gráfico (últimos 6 meses)
+        const mesesData: any[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+          const mesNombre = fecha.toLocaleDateString('es-ES', { month: 'short' });
+          
+          const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+          const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+
+          // Ingresos del mes
+          const ingQuery = query(
+            collection(db, 'ingresos'),
+            where('fecha', '>=', primerDia.toISOString().split('T')[0]),
+            where('fecha', '<=', ultimoDia.toISOString().split('T')[0])
+          );
+          const ingSnapshot = await getDocs(ingQuery);
+          const ingTotal = ingSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
+
+          // Egresos del mes
+          const egrQuery = query(
+            collection(db, 'egresos'),
+            where('fecha', '>=', primerDia.toISOString().split('T')[0]),
+            where('fecha', '<=', ultimoDia.toISOString().split('T')[0])
+          );
+          const egrSnapshot = await getDocs(egrQuery);
+          const egrTotal = egrSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
+
+          mesesData.push({
+            mes: mesNombre,
+            ingresos: ingTotal,
+            egresos: egrTotal,
+            balance: ingTotal - egrTotal,
+          });
+        }
+        setChartData(mesesData);
+
+        // Últimas ventas
+        const ventasRecientesQuery = query(
+          collection(db, 'ventas'),
+          orderBy('fecha', 'desc'),
+          limit(5)
+        );
+        const ventasRecientesSnapshot = await getDocs(ventasRecientesQuery);
+        const ventasData = ventasRecientesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Venta[];
+        setUltimasVentas(ventasData);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
       } finally {
@@ -93,6 +146,17 @@ export default function DashboardPage() {
   }, []);
 
   const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return '-';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return new Intl.DateTimeFormat('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
 
   const statsData = [
     { label: 'Ventas hoy', value: formatCurrency(stats.ventasHoy), icon: '💰', color: 'blue' },
@@ -134,7 +198,30 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Accesos rápidos */}
+        {/* Gráfico de ingresos vs egresos */}
+        {chartData.length > 0 && (
+          <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Ingresos vs Egresos (Últimos 6 meses)</h2>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="mes" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any) => formatCurrency(Number(value))}
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="ingresos" fill="#10b981" name="Ingresos" />
+                  <Bar dataKey="egresos" fill="#ef4444" name="Egresos" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Accesos rápidos y últimas ventas */}
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Accesos rápidos</h2>
@@ -171,23 +258,43 @@ export default function DashboardPage() {
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Resumen</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Ingresos del mes:</span>
-                <span className="font-medium text-green-600">{formatCurrency(stats.ingresosMes)}</span>
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Últimas ventas</h2>
+            {ultimasVentas.length === 0 ? (
+              <p className="text-sm text-gray-500">No hay ventas recientes</p>
+            ) : (
+              <div className="space-y-3">
+                {ultimasVentas.map((venta) => (
+                  <Link
+                    key={venta.id}
+                    href={`/ventas/${venta.id}`}
+                    className="block rounded-md border border-gray-200 p-3 hover:bg-gray-50"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-gray-900">{venta.cliente || 'Mostrador'}</p>
+                        <p className="text-sm text-gray-500">
+                          {formatDate(venta.fecha)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-600">{formatCurrency(venta.total)}</p>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                            venta.estado === 'completada'
+                              ? 'bg-green-100 text-green-800'
+                              : venta.estado === 'cancelada'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {venta.estado}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Egresos del mes:</span>
-                <span className="font-medium text-red-600">{formatCurrency(stats.egresosMes)}</span>
-              </div>
-              <div className="border-t pt-3 flex justify-between">
-                <span className="font-medium text-gray-900">Balance:</span>
-                <span className={`font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(balance)}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -67,189 +67,190 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
   - [x] Cerrar sesión implementado
   - [ ] Página `/perfil` - Ver/editar datos (pendiente)
 
----
-
----
-
-### Fase 3: Módulo de Productos ✅ PARCIALMENTE COMPLETADA
+### Fase 3: Módulo de Productos ✅ COMPLETADA
 
 - [x] 3.1 Modelo de datos
   - [x] `src/types/producto.ts` - Interfaz Producto
 
 - [x] 3.2 Listado de productos
-  - [x] `src/app/productos/page.tsx` - Página principal
+  - [x] `src/app/(dashboard)/productos/page.tsx` - Página principal
   - [x] `src/components/productos/ProductoList.tsx` - Tabla con búsqueda y filtros
   - [x] Alerta visual de stock bajo
 
 - [x] 3.3 Crear productos
-  - [x] `src/app/productos/nuevo/page.tsx` - Página de creación (Admin, Gerente)
+  - [x] `src/app/(dashboard)/productos/nuevo/page.tsx` - Página de creación (Admin, Gerente)
   - [x] `src/components/productos/ProductoForm.tsx` - Formulario con validación
 
-- [x] 3.4 Editar/Eliminar productos ✅ COMPLETADA
-  - [x] `src/app/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
+- [x] 3.4 Editar/Eliminar productos
+  - [x] `src/app/(dashboard)/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
   - [x] Función eliminar en ProductoList (solo Admin)
 
 - [ ] 3.5 Gestión de inventario
   - [ ] Historial de movimientos de inventario
-  - [ ] `src/app/inventario/movimientos/page.tsx`
+  - [ ] `src/app/(dashboard)/inventario/movimientos/page.tsx`
 
 ---
 
-### Fase 4: Módulo de Ingresos
+### Fase 4: Módulo de Ingresos ✅ COMPLETADA
 
-- [ ] 4.1 Modelo de datos
+- [x] 4.1 Modelo de datos
   ```typescript
-  interface Producto {
+  interface Ingreso {
     id: string;
-    nombre: string;
-    descripcion?: string;
-    precioCompra: number;
-    precioVenta: number;
-    stock: number;
-    stockMinimo: number;
-    categoria?: string;
-    sku?: string;
-    activo: boolean;
+    monto: number;
+    descripcion: string;
+    fecha: string;
+    categoria: string;
+    creadoPor: string;
     createdAt: Timestamp;
-    updatedAt: Timestamp;
   }
   ```
 
-- [ ] 4.2 CRUD de productos
-  - [ ] `src/app/productos/page.tsx` - Listado con búsqueda y filtros
-  - [ ] `src/app/productos/nuevo/page.tsx` - Crear producto (Admin, Gerente)
-  - [ ] `src/app/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
-  - [ ] `src/components/productos/ProductoList.tsx`
-  - [ ] `src/components/productos/ProductoForm.tsx`
-  - [ ] `src/components/productos/StockAlert.tsx` - Alerta de stock bajo
-
-- [ ] 4.3 Gestión de inventario
-  - [ ] Ajuste de stock manual (entradas/salidas)
-  - [ ] Historial de movimientos de inventario
-  - [ ] `src/app/inventario/movimientos/page.tsx`
+- [x] 4.2 CRUD de ingresos
+  - [x] `src/app/(dashboard)/ingresos/page.tsx` - Listado con búsqueda y filtros
+  - [x] `src/app/(dashboard)/ingresos/nuevo/page.tsx` - Crear producto (Admin, Gerente)
+  - [x] `src/app/(dashboard)/ingresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
+  - [x] `src/components/ingresos/IngresoList.tsx`
+  - [x] `src/components/ingresos/IngresoForm.tsx`
+  - [x] Función eliminar en IngresoList (solo Admin)
 
 ---
 
-### Fase 5: Módulo de Ventas ✅ PARCIALMENTE COMPLETADA
+### Fase 5: Módulo de Ventas ✅ COMPLETADA
 
 - [x] 5.1 Modelo de datos
   - [x] `src/types/venta.ts` - Interfaces Venta y VentaItem
 
 - [x] 5.2 Listado de ventas
-  - [x] `src/app/ventas/page.tsx` - Página principal
+  - [x] `src/app/(dashboard)/ventas/page.tsx` - Página principal
   - [x] `src/components/ventas/VentaList.tsx` - Tabla con estados
 
 - [x] 5.3 Crear ventas
-  - [x] `src/app/ventas/nueva/page.tsx` - Página de creación
+  - [x] `src/app/(dashboard)/ventas/nueva/page.tsx` - Página de creación
   - [x] `src/components/ventas/VentaForm.tsx` - Formulario con carrito de productos
   - [x] Descuento automático de stock al registrar venta
 
-- [ ] 5.4 Detalle y edición
-  - [ ] `src/app/ventas/[id]/page.tsx` - Ver detalle
-  - [ ] Función cancelar venta (Admin, Gerente)
+- [x] 5.4 Detalle y edición
+  - [x] `src/app/(dashboard)/ventas/[id]/page.tsx` - Ver detalle
+  - [x] Función cancelar venta (Admin, Gerente) con restauración de stock
 
 ---
 
-### Fase 6: Módulo de Ingresos ✅ COMPLETADA
+### Fase 6: Módulo de Egresos ✅ COMPLETADA
 
 - [x] 6.1 Modelo de datos
-  - [x] `src/types/ingreso.ts`
-
-- [x] 6.2 CRUD de ingresos
-  - [x] `src/app/ingresos/page.tsx` - Listado con total acumulado (Admin, Gerente)
-  - [x] `src/app/ingresos/nuevo/page.tsx` - Crear (Admin, Gerente)
-  - [x] `src/components/ingresos/IngresoList.tsx`
-  - [x] `src/components/ingresos/IngresoForm.tsx`
-
-- [ ] 6.3 Editar/Eliminar ingresos
-  - [ ] `src/app/ingresos/[id]/editar/page.tsx`
-
----
-
-### Fase 7: Módulo de Egresos ✅ COMPLETADA
-
-- [x] 7.1 Modelo de datos
   - [x] `src/types/egreso.ts`
 
-- [x] 7.2 CRUD de egresos
-  - [x] `src/app/egresos/page.tsx` - Listado con total acumulado (Admin, Gerente)
-  - [x] `src/app/egresos/nuevo/page.tsx` - Crear (Admin, Gerente)
+- [x] 6.2 CRUD de egresos
+  - [x] `src/app/(dashboard)/egresos/page.tsx` - Listado con total acumulado (Admin, Gerente)
+  - [x] `src/app/(dashboard)/egresos/nuevo/page.tsx` - Crear (Admin, Gerente)
+  - [x] `src/app/(dashboard)/egresos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
   - [x] `src/components/egresos/EgresoList.tsx`
   - [x] `src/components/egresos/EgresoForm.tsx`
-
-- [ ] 7.3 Editar/Eliminar egresos
-  - [ ] `src/app/egresos/[id]/editar/page.tsx`
+  - [x] Función eliminar en EgresoList (solo Admin)
 
 ---
 
-### Fase 8: Dashboard y Reportes ✅ PARCIALMENTE COMPLETADA
+### Fase 7: Dashboard y Reportes ✅ PARCIALMENTE COMPLETADA
 
-- [x] 8.1 Dashboard principal
-  - [x] `src/app/dashboard/page.tsx` - Vista inicial con datos reales
+- [x] 7.1 Dashboard principal
+  - [x] `src/app/(dashboard)/dashboard/page.tsx` - Vista inicial con datos reales
   - [x] Balance del mes en tiempo real
   - [x] Cards con: ventas hoy, productos en stock, ingresos del mes, egresos del mes
+  - [x] Accesos rápidos a formularios de creación
 
-- [ ] 8.2 Gráficos y visualizaciones
-  - [ ] Gráfico de ingresos vs egresos (recharts)
-  - [ ] Últimas ventas recientes
+- [x] 7.2 Gráficos y visualizaciones
+  - [x] Gráfico de ingresos vs egresos (recharts) - últimos 6 meses
+  - [x] Últimas ventas recientes en dashboard
 
-- [ ] 8.3 Reportes por rol
+- [ ] 7.3 Reportes por rol
   - [ ] Admin: todos los reportes, filtros por fecha/usuario
   - [ ] Gerente: reportes generales
   - [ ] Vendedor: solo sus estadísticas
 
-- [ ] 8.4 Exportar reportes
-  - [ ] Exportar a CSV
+- [ ] 7.4 Exportar reportes
+  - [ ] Exportar a CSV (opcional)
   - [ ] Exportar a PDF (opcional)
 
 ---
 
-### Fase 9: Gestión de Usuarios (Solo Admin)
+### Fase 8: Gestión de Usuarios (Solo Admin)
 
-- [ ] 9.1 CRUD de usuarios
-  - [ ] `src/app/usuarios/page.tsx` - Listado
-  - [ ] `src/app/usuarios/nuevo/page.tsx` - Crear
-  - [ ] `src/app/usuarios/[id]/editar/page.tsx` - Editar rol
+- [ ] 8.1 CRUD de usuarios
+  - [ ] `src/app/(dashboard)/usuarios/page.tsx` - Listado
+  - [ ] `src/app/(dashboard)/usuarios/nuevo/page.tsx` - Crear
+  - [ ] `src/app/(dashboard)/usuarios/[id]/editar/page.tsx` - Editar rol
   - [ ] `src/components/usuarios/UserList.tsx`
   - [ ] `src/components/usuarios/UserForm.tsx`
 
 ---
 
-## Estructura de Directorios Propuesta
+## Estructura de Directorios Actual
 
 ```
 src/
 ├── app/
 │   ├── (auth)/
 │   │   ├── login/
+│   │   │   └── page.tsx
 │   │   └── registro/
+│   │       └── page.tsx
 │   ├── (dashboard)/
+│   │   ├── layout.tsx              # Sidebar + Header
 │   │   ├── dashboard/
+│   │   │   └── page.tsx            # Dashboard principal
 │   │   ├── productos/
-│   │   ├── inventario/
+│   │   │   ├── page.tsx            # Listado
+│   │   │   ├── nuevo/
+│   │   │   │   └── page.tsx        # Crear
+│   │   │   └── [id]/
+│   │   │       └── editar/
+│   │   │           └── page.tsx    # Editar
 │   │   ├── ingresos/
+│   │   │   ├── page.tsx            # Listado
+│   │   │   ├── nuevo/
+│   │   │   │   └── page.tsx        # Crear
+│   │   │   └── [id]/
+│   │   │       └── editar/
+│   │   │           └── page.tsx    # Editar
 │   │   ├── egresos/
-│   │   ├── ventas/
-│   │   └── usuarios/
+│   │   │   ├── page.tsx            # Listado
+│   │   │   ├── nuevo/
+│   │   │   │   └── page.tsx        # Crear
+│   │   │   └── [id]/
+│   │   │       └── editar/
+│   │   │           └── page.tsx    # Editar
+│   │   └── ventas/
+│   │       ├── page.tsx            # Listado
+│   │       ├── nueva/
+│   │       │   └── page.tsx        # Crear
+│   │       └── [id]/
+│   │           └── page.tsx        # Detalle + Cancelar
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/
 │   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   ├── RegisterForm.tsx
+│   │   └── ProtectedRoute.tsx
 │   ├── productos/
-│   ├── inventario/
+│   │   ├── ProductoList.tsx
+│   │   └── ProductoForm.tsx
 │   ├── ingresos/
+│   │   ├── IngresoList.tsx
+│   │   └── IngresoForm.tsx
 │   ├── egresos/
-│   ├── ventas/
-│   ├── usuarios/
-│   └── ui/ (componentes reutilizables)
+│   │   ├── EgresoList.tsx
+│   │   └── EgresoForm.tsx
+│   └── ventas/
+│       ├── VentaList.tsx
+│       └── VentaForm.tsx
 ├── contexts/
 │   └── AuthContext.tsx
 ├── hooks/
-│   ├── useAuth.ts
 │   └── useRole.ts
 ├── lib/
-│   ├── firebase.ts
-│   └── utils.ts
+│   └── firebase.ts
 ├── types/
 │   ├── auth.ts
 │   ├── producto.ts
@@ -342,32 +343,30 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 
 ---
 
-## Dependencias a Instalar
+## Dependencias Instaladas
 
 ```bash
-# Firebase y visualización
-npm install firebase recharts
+# Firebase
+npm install firebase
 
-# Utilidades (opcional pero recomendado)
-npm install react-hook-form zod @hookform/resolvers sonner
-# - react-hook-form: gestión de formularios
-# - zod: validación de esquemas
-# - sonner: notificaciones toast
+# Visualización
+npm install recharts
 
-npm install -D @types/firebase
+# Notificaciones toast
+npm install sonner
 ```
 
 ---
 
 ## Próximos Pasos Inmediatos
 
-- [ ] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
-- [ ] Ver detalle de venta: `src/app/ventas/[id]/page.tsx`
-- [ ] Cancelar venta (Admin, Gerente)
-- [ ] Editar/Eliminar ingresos y egresos
-- [ ] Agregar gráficos al dashboard (recharts)
+- [x] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
+- [ ] Agregar reportes por rol con filtros por fecha
+- [ ] Exportar reportes a CSV
 - [ ] Página de usuarios (Admin)
+- [ ] Gestión de inventario - historial de movimientos
+- [ ] Página de perfil de usuario
 
 ---
 
-*Documento creado: 2026-04-14*
+*Última actualización: 2026-04-14*

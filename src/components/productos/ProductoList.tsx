@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where, Query, CollectionReference } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Producto } from '@/types/producto';
 import { useRole } from '@/hooks/useRole';
@@ -21,7 +21,7 @@ export function ProductoList() {
       if (!user) return;
 
       try {
-        let q = collection(db, 'productos');
+        let q: Query | CollectionReference = collection(db, 'productos');
 
         // Vendedores solo ven productos activos
         if (role.isVendedor()) {

@@ -1,48 +1,52 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { collection, getDocs, getDoc, query, orderBy, where, doc, updateDoc, serverTimestamp, Query, CollectionReference } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Venta } from '@/types/venta';
+import { Venta, VentaItem } from '@/types/venta';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
+import { toast } from 'sonner';
 
 export function VentaList() {
+  const router = useRouter();
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
   const role = useRole();
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchVentas() {
-      if (!user) return;
-
-      try {
-        let q = collection(db, 'ventas');
-
-        // Vendedores solo ven sus propias ventas
-        if (role.isVendedor()) {
-          q = query(q, where('vendedorId', '==', user.uid));
-        }
-
-        q = query(q, orderBy('fecha', 'desc'));
-
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Venta[];
-
-        setVentas(data);
-      } catch (error) {
-        console.error('Error fetching ventas:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchVentas();
   }, [user, role]);
+
+  async function fetchVentas() {
+    if (!user) return;
+
+    try {
+      let q: Query | CollectionReference = collection(db, 'ventas');
+
+      // Vendedores solo ven sus propias ventas
+      if (role.isVendedor()) {
+        q = query(q, where('vendedorId', '==', user.uid));
+      }
+
+      q = query(q, orderBy('fecha', 'desc'));
+
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Venta[];
+
+      setVentas(data);
+    } catch (error) {
+      console.error('Error fetching ventas:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
@@ -67,6 +71,50 @@ export function VentaList() {
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleCancelarVenta = async (venta: Venta) => {
+    const confirmed = window.confirm(
+      '¿Estás seguro de cancelar esta venta? Se restaurará el stock de los productos.'
+    );
+
+    if (!confirmed) return;
+
+    setCancelingId(venta.id);
+
+    try {
+      // Actualizar estado de la venta
+      await updateDoc(doc(db, 'ventas', venta.id), {
+        estado: 'cancelada',
+        updatedAt: serverTimestamp(),
+      });
+
+      // Restaurar stock de cada producto
+      const restorePromises = venta.items.map(async (item: VentaItem) => {
+        const productoRef = doc(db, 'productos', item.productoId);
+        const productoDoc = await getDoc(productoRef);
+        
+        if (productoDoc.exists()) {
+          const currentStock = productoDoc.data().stock || 0;
+          await updateDoc(productoRef, {
+            stock: currentStock + item.cantidad,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      });
+
+      await Promise.all(restorePromises);
+
+      toast.success('Venta cancelada exitosamente');
+      
+      // Recargar la lista
+      fetchVentas();
+    } catch (error) {
+      console.error('Error al cancelar venta:', error);
+      toast.error('Error al cancelar la venta');
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -115,9 +163,20 @@ export function VentaList() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  <button className="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
+                  <button 
+                    onClick={() => router.push(`/ventas/${venta.id}`)}
+                    className="text-blue-600 hover:text-blue-800 mr-3"
+                  >
+                    Ver
+                  </button>
                   {(role.isGerente() || role.isAdmin()) && venta.estado !== 'cancelada' && (
-                    <button className="text-red-600 hover:text-red-800">Cancelar</button>
+                    <button 
+                      onClick={() => handleCancelarVenta(venta)}
+                      disabled={cancelingId === venta.id}
+                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                    >
+                      {cancelingId === venta.id ? 'Cancelando...' : 'Cancelar'}
+                    </button>
                   )}
                 </td>
               </tr>
