@@ -174,14 +174,15 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 ---
 
-### Fase 8: Gestión de Usuarios (Solo Admin)
+### Fase 8: Gestión de Usuarios (Solo Admin) ✅ COMPLETADA
 
-- [ ] 8.1 CRUD de usuarios
-  - [ ] `src/app/(dashboard)/usuarios/page.tsx` - Listado
-  - [ ] `src/app/(dashboard)/usuarios/nuevo/page.tsx` - Crear
-  - [ ] `src/app/(dashboard)/usuarios/[id]/editar/page.tsx` - Editar rol
-  - [ ] `src/components/usuarios/UserList.tsx`
-  - [ ] `src/components/usuarios/UserForm.tsx`
+- [x] 8.1 CRUD de usuarios
+  - [x] `src/app/(dashboard)/usuarios/page.tsx` - Listado con búsqueda y filtros
+  - [x] `src/app/(dashboard)/usuarios/nuevo/page.tsx` - Crear usuario con Firebase Auth
+  - [x] `src/app/(dashboard)/usuarios/[id]/editar/page.tsx` - Editar rol y datos
+  - [x] `src/components/usuarios/UserList.tsx` - Tabla con activar/desactivar y eliminar
+  - [x] `src/components/usuarios/UserForm.tsx` - Formulario con validación
+  - [x] `src/types/usuario.ts` - Interfaces Usuario y UsuarioForm
 
 ---
 
