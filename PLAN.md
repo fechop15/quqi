@@ -65,7 +65,7 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
 
 - [x] 2.3 Perfil de usuario
   - [x] Cerrar sesión implementado
-  - [ ] Página `/perfil` - Ver/editar datos (pendiente)
+  - [x] Página `/perfil` - Ver/editar datos del usuario
 
 ### Fase 3: Módulo de Productos ✅ COMPLETADA
 
@@ -85,9 +85,11 @@ Aplicación web para gestión de ingresos, egresos y ventas con autenticación y
   - [x] `src/app/(dashboard)/productos/[id]/editar/page.tsx` - Editar (Admin, Gerente)
   - [x] Función eliminar en ProductoList (solo Admin)
 
-- [ ] 3.5 Gestión de inventario
-  - [ ] Historial de movimientos de inventario
-  - [ ] `src/app/(dashboard)/inventario/movimientos/page.tsx`
+- [x] 3.5 Gestión de inventario ✅ COMPLETADA
+  - [x] Historial de movimientos de inventario
+  - [x] `src/app/(dashboard)/inventario/movimientos/page.tsx`
+  - [x] Registro automático al crear/editar productos
+  - [x] Registro automático al registrar ventas
 
 ---
 
@@ -221,12 +223,24 @@ src/
 │   │   │   └── [id]/
 │   │   │       └── editar/
 │   │   │           └── page.tsx    # Editar
-│   │   └── ventas/
-│   │       ├── page.tsx            # Listado
-│   │       ├── nueva/
-│   │       │   └── page.tsx        # Crear
-│   │       └── [id]/
-│   │           └── page.tsx        # Detalle + Cancelar
+│   │   ├── ventas/
+│   │   │   ├── page.tsx            # Listado
+│   │   │   ├── nueva/
+│   │   │   │   └── page.tsx        # Crear
+│   │   │   └── [id]/
+│   │   │       └── page.tsx        # Detalle + Cancelar
+│   │   ├── inventario/
+│   │   │   └── movimientos/
+│   │   │       └── page.tsx        # Historial de movimientos
+│   │   ├── usuarios/
+│   │   │   ├── page.tsx            # Listado
+│   │   │   ├── nuevo/
+│   │   │   │   └── page.tsx        # Crear
+│   │   │   └── [id]/
+│   │   │       └── editar/
+│   │   │           └── page.tsx    # Editar rol
+│   │   └── perfil/
+│   │       └── page.tsx            # Perfil del usuario
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/
@@ -243,21 +257,29 @@ src/
 │   ├── egresos/
 │   │   ├── EgresoList.tsx
 │   │   └── EgresoForm.tsx
-│   └── ventas/
-│       ├── VentaList.tsx
-│       └── VentaForm.tsx
+│   ├── ventas/
+│   │   ├── VentaList.tsx
+│   │   └── VentaForm.tsx
+│   ├── usuarios/
+│   │   ├── UserList.tsx
+│   │   └── UserForm.tsx
+│   └── inventario/
+│       └── InventarioMovimientos.tsx
 ├── contexts/
 │   └── AuthContext.tsx
 ├── hooks/
 │   └── useRole.ts
 ├── lib/
-│   └── firebase.ts
+│   ├── firebase.ts
+│   └── utils.ts                    # formatCurrency (COP)
 ├── types/
 │   ├── auth.ts
 │   ├── producto.ts
 │   ├── ingreso.ts
 │   ├── egreso.ts
-│   └── venta.ts
+│   ├── venta.ts
+│   ├── usuario.ts
+│   └── inventario.ts
 └── middleware.ts
 ```
 
@@ -273,57 +295,63 @@ service cloud.firestore {
     function isLoggedIn() {
       return request.auth != null;
     }
-    
+
     function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
     }
-    
+
+    function hasRole(requiredRoles) {
+      let userRole = getUserRole();
+      return userRole in requiredRoles;
+    }
+
     function isAdmin() {
       return getUserRole() == 'admin';
     }
-    
+
     function isManager() {
-      return getUserRole() == 'gerente' || isAdmin();
+      return getUserRole() in ['admin', 'gerente'];
     }
-    
-    // Users collection
-    match /users/{userId} {
-      allow read: if isLoggedIn() && (userId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
+
+    // Usuarios (perfiles del sistema)
+    match /usuarios/{userId} {
+      allow read: if isLoggedIn();
+      allow create, update, delete: if isAdmin();
+      allow update: if isLoggedIn() && request.auth.uid == userId;
     }
-    
+
     // Ingresos
     match /ingresos/{ingresoId} {
       allow read: if isLoggedIn() && isManager();
       allow create, update, delete: if isLoggedIn() && isManager();
     }
-    
+
     // Egresos
     match /egresos/{egresoId} {
       allow read: if isLoggedIn() && isManager();
       allow create, update, delete: if isLoggedIn() && isManager();
     }
-    
+
     // Ventas
     match /ventas/{ventaId} {
-      allow read: if isLoggedIn() && 
-        (isAdmin() || isManager() || resource.data.vendedorId == request.auth.uid);
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn();
-      allow update: if isLoggedIn() && (isAdmin() || isManager());
+      allow update: if isLoggedIn() && isManager();
       allow delete: if isAdmin();
     }
-    
+
     // Productos
     match /productos/{productoId} {
       allow read: if isLoggedIn();
       allow create, update: if isLoggedIn() && isManager();
       allow delete: if isAdmin();
     }
-    
-    // Inventario movimientos
-    match /inventario_movimientos/{movimientoId} {
+
+    // Movimientos de inventario
+    match /movimientos_inventario/{movimientoId} {
       allow read: if isLoggedIn() && isManager();
       allow create: if isLoggedIn() && isManager();
+      allow update, delete: if isAdmin();
     }
   }
 }
@@ -361,12 +389,9 @@ npm install sonner
 
 ## Próximos Pasos Inmediatos
 
-- [x] Configurar reglas de seguridad en Firestore (copiar del PLAN.md)
-- [ ] Agregar reportes por rol con filtros por fecha
+- [ ] Reportes por rol con filtros por fecha
 - [ ] Exportar reportes a CSV
-- [ ] Página de usuarios (Admin)
-- [ ] Gestión de inventario - historial de movimientos
-- [ ] Página de perfil de usuario
+- [ ] Actualizar reglas de seguridad de Firestore (colección movimientos_inventario)
 
 ---
 
