@@ -78,7 +78,7 @@ export function EgresoList() {
             ) : (
               egresos.map((egreso) => (
                 <tr key={egreso.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm">{formatDate(egreso.fecha)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(egreso.fecha)}</td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800">
                       {egreso.categoria}
