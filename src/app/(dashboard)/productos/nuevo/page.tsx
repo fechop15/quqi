@@ -1,5 +1,5 @@
 'use client';
-
+export const dynamic = 'force-dynamic';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProductoForm } from '@/components/productos/ProductoForm';
 import { PageHeader } from '@/components/ui';

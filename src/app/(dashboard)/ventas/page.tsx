@@ -1,5 +1,5 @@
 'use client';
-
+export const dynamic = 'force-dynamic';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { VentaList } from '@/components/ventas/VentaList';
 import { PageHeader } from '@/components/ui';
