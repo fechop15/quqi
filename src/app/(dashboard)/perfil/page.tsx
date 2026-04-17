@@ -37,7 +37,7 @@ export default function PerfilPage() {
     try {
       if (!user || !profile) return;
 
-      await updateDoc(doc(db, 'usuarios', profile.id), {
+      await updateDoc(doc(db, 'users', profile.id), {
         nombre,
       });
 

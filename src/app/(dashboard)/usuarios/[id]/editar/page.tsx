@@ -19,7 +19,7 @@ export default function UsuarioEditarPage() {
   useEffect(() => {
     async function fetchUsuario() {
       try {
-        const usuarioDoc = await getDoc(doc(db, 'usuarios', usuarioId));
+        const usuarioDoc = await getDoc(doc(db, 'users', usuarioId));
         if (!usuarioDoc.exists()) {
           toast.error('Usuario no encontrado');
           router.push('/usuarios');

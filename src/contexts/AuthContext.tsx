@@ -75,15 +75,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, nombre: string) => {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(user, { displayName: nombre });
-    await setDoc(doc(db, 'users', user.uid), {
-      email,
-      nombre,
-      role: 'vendedor',
-      activo: true,
-      createdAt: serverTimestamp(),
-    });
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(user, { displayName: nombre });
+      
+      const userData = {
+        email,
+        nombre,
+        role: 'vendedor',
+        activo: true,
+        createdAt: serverTimestamp(),
+      };
+      
+      console.log('Creando documento en Firestore:', user.uid, userData);
+      await setDoc(doc(db, 'users', user.uid), userData);
+      console.log('Documento creado exitosamente');
+    } catch (error) {
+      console.error('Error en signUp:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {

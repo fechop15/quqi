@@ -27,7 +27,7 @@ export function UserList() {
     if (!user) return;
 
     try {
-      const q = query(collection(db, 'usuarios'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -45,7 +45,7 @@ export function UserList() {
   const handleToggleActivo = async (usuario: Usuario) => {
     setUpdatingId(usuario.id);
     try {
-      await updateDoc(doc(db, 'usuarios', usuario.id), {
+      await updateDoc(doc(db, 'users', usuario.id), {
         activo: !usuario.activo,
       });
       toast.success(usuario.activo ? 'Usuario desactivado' : 'Usuario activado');
@@ -62,7 +62,7 @@ export function UserList() {
     if (!confirmed) return;
 
     try {
-      await deleteDoc(doc(db, 'usuarios', id));
+      await deleteDoc(doc(db, 'users', id));
       toast.success('Usuario eliminado');
       fetchUsuarios();
     } catch (error) {

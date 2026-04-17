@@ -58,7 +58,7 @@ export function UserForm({ initialData, mode }: UserFormProps) {
         );
 
         // Guardar perfil en Firestore
-        await addDoc(collection(db, 'usuarios'), {
+        await addDoc(collection(db, 'users'), {
           uid: userCredential.user.uid,
           email: formData.email,
           nombre: formData.nombre,
@@ -75,7 +75,7 @@ export function UserForm({ initialData, mode }: UserFormProps) {
           return;
         }
 
-        await updateDoc(doc(db, 'usuarios', initialData.id), {
+        await updateDoc(doc(db, 'users', initialData.id), {
           nombre: formData.nombre,
           role: formData.role,
         });
