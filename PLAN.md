@@ -316,9 +316,8 @@ service cloud.firestore {
     // Usuarios (perfiles del sistema)
     match /users/{userId} {
       allow read: if isLoggedIn();
-      allow create: if request.auth.uid == userId;
+      allow create: if isLoggedIn();
       allow update, delete: if isAdmin();
-      allow update: if request.auth.uid == userId;
     }
 
     // Ingresos

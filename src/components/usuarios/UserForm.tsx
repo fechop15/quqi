@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { UsuarioForm } from '@/types/usuario';
@@ -57,8 +57,8 @@ export function UserForm({ initialData, mode }: UserFormProps) {
           formData.password
         );
 
-        // Guardar perfil en Firestore
-        await addDoc(collection(db, 'users'), {
+        // Guardar perfil en Firestore con el UID como ID
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
           uid: userCredential.user.uid,
           email: formData.email,
           nombre: formData.nombre,
