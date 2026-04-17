@@ -1,5 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { EgresoForm } from '@/components/egresos/EgresoForm';
 import { PageHeader } from '@/components/ui';
