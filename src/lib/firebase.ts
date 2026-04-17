@@ -11,7 +11,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Inicializar Firebase (solo una vez)
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;

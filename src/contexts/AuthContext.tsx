@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Obtener perfil del usuario desde Firestore
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
@@ -63,7 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
-    // Verificar que el usuario tenga perfil y esté activo
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
       await signOut(auth);
@@ -79,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, nombre: string) => {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(user, { displayName: nombre });
-    // Crear perfil en Firestore con rol por defecto 'vendedor'
     await setDoc(doc(db, 'users', user.uid), {
       email,
       nombre,
