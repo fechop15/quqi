@@ -1,19 +1,67 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Commands
+- `npm run dev` - Development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+# Env Vars Required for Vercel
+Firebase config MUST be in both Production AND Development environments:
+```
+NEXT_PUBLIC_FIREBASE_API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_APP_ID
+```
+Without ALL of these, build fails with `auth/invalid-api-key`.
+
+# Stack
+- Next.js 16 (NOT the Next.js you know - APIs may differ)
+- Firebase Auth + Firestore
+- TailwindCSS, react-hook-form, zod, recharts
+
+# Architecture
+
+## Route Groups (app folder)
+- `(auth)` - Public routes (login, registro)
+- `(dashboard)` - Protected routes with sidebar layout
+
+## Pages
+| Route | Description |
+|-------|-------------|
+| `/login`, `/registro` | Autenticación pública |
+| `/dashboard` | Panel principal con estadísticas |
+| `/productos` | CRUD productos |
+| `/ventas` | Registro y listado de ventas |
+| `/ingresos` | Ingreso de mercadería |
+| `/egresos` | Egresos/gastos |
+| `/usuarios` | Gestión de usuarios (admin) |
+| `/reportes` | Reportes y gráficos |
+| `/perfil` | Perfil del usuario |
+| `/inventario/movimientos` | Historial de inventario |
+
+## Roles
+- `admin` - Acceso total
+- `gerente` - Gestión de productos, ventas, ingresos, egresos, reportes
+- `vendedor` - Solo crear ventas y ver productos
+
+## Collections Firestore
+- `users` - Perfiles de usuarios (uid, email, nombre, role, activo)
+- `productos` - Catálogo de productos
+- `ventas` - Registro de ventas
+- `ingresos` - Ingresos de mercadería
+- `egresos` - Egresos/gastos
+- `inventario` - Movimientos de stock
+
+## Key Files
+- `src/lib/firebase.ts` - Firebase initialization
+- `src/contexts/AuthContext.tsx` - Auth provider with user state
+- `src/components/auth/ProtectedRoute.tsx` - Role-based route protection
+- `src/hooks/useRole.ts` - Role checking hook
 
 # Available Skills
 
 ## UI/UX Pro Max
 - **Location**: `.opencode/skills/ui-ux-pro-max/`
-- **Purpose**: Professional UI/UX design intelligence for web/mobile applications
-- **Features**:
-  - 67 UI Styles (Glassmorphism, Neumorphism, Minimalism, etc.)
-  - 161 Color Palettes
-  - 57 Font Pairings
-  - 161 Industry-specific reasoning rules
-  - Pre-delivery checklist for quality assurance
+- **Purpose**: Professional UI/UX design intelligence
 - **Usage**: Request UI/UX tasks naturally (e.g., "Build a landing page", "Improve the dashboard design")
-- **Documentation**: Run `python3 .opencode/skills/ui-ux-pro-max/scripts/search.py --help` for advanced commands
