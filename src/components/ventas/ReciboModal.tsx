@@ -76,7 +76,7 @@ export function ReciboModal({ venta, onClose }: ReciboModalProps) {
 
         <div ref={printRef} className="p-4">
           <h1 className="mb-1 text-center text-xl font-bold">QUQI</h1>
-          <p className="mb-4 text-center text-xs text-gray-600 italic">Sabor Costeño</p>
+          <p className="mb-4 text-center text-xl text-gray-600 italic">Sabor Costeño</p>
           <div className="mb-4 text-center text-sm text-gray-600">
             <p>Fecha: {venta.fechaString || new Date().toLocaleDateString('es-CO')}</p>
             <p>Folio: {venta.id.slice(0, 8).toUpperCase()}</p>
