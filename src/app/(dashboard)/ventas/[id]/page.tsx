@@ -10,6 +10,7 @@ import { Venta, VentaItem } from '@/types/venta';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
+import { ReciboModal } from '@/components/ventas/ReciboModal';
 
 export default function VentaDetallePage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function VentaDetallePage() {
   const [venta, setVenta] = useState<Venta | null>(null);
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(false);
+  const [mostrarRecibo, setMostrarRecibo] = useState(false);
 
   const ventaId = params.id as string;
 
@@ -148,6 +150,12 @@ export default function VentaDetallePage() {
             >
               ← Volver
             </Link>
+            <button
+              onClick={() => setMostrarRecibo(true)}
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Imprimir Recibo
+            </button>
             {(role.isGerente() || role.isAdmin()) && venta.estado !== 'cancelada' && (
               <button
                 onClick={handleCancelarVenta}
@@ -226,6 +234,21 @@ export default function VentaDetallePage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Recibo */}
+      {mostrarRecibo && (
+        <ReciboModal
+          venta={{
+            id: venta.id,
+            items: venta.items,
+            total: venta.total,
+            cliente: venta.cliente || 'Mostrador',
+            vendedorNombre: venta.vendedorNombre,
+            fechaString: venta.fechaString,
+          }}
+          onClose={() => setMostrarRecibo(false)}
+        />
+      )}
     </ProtectedRoute>
   );
 }

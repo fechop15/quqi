@@ -18,6 +18,7 @@ export interface Venta {
   vendedorId: string;
   vendedorNombre?: string;
   fecha: Timestamp;
+  fechaString?: string;
   estado: VentaEstado;
   createdAt?: Timestamp;
 }
