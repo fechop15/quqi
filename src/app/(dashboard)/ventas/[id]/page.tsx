@@ -194,6 +194,10 @@ export default function VentaDetallePage() {
                 {venta.estado}
               </span>
             </div>
+            <div>
+              <p className="text-sm text-gray-600">Forma de pago</p>
+              <p className="font-medium capitalize">{venta.formaPago || 'efectivo'}</p>
+            </div>
           </div>
         </div>
 

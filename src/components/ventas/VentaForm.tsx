@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Producto } from '@/types/producto';
 import { VentaItem } from '@/types/venta';
 import { formatCurrency } from '@/lib/utils';
+import { FormaPago } from '@/types/venta';
 import { ReciboModal } from './ReciboModal';
 
 interface VentaItemForm extends Omit<VentaItem, 'subtotal'> {
@@ -25,6 +26,7 @@ export function VentaForm() {
   const [productoSeleccionado, setProductoSeleccionado] = useState('');
   const [cantidad, setCantidad] = useState(1);
   const [generarRecibo, setGenerarRecibo] = useState(true);
+  const [formaPago, setFormaPago] = useState<FormaPago>('efectivo');
   const [ventaRegistrada, setVentaRegistrada] = useState<any>(null);
 
   // Cargar productos activos
@@ -111,6 +113,7 @@ export function VentaForm() {
         vendedorId: user.uid,
         vendedorNombre: profile?.nombre,
         estado: 'completada' as const,
+        formaPago,
         fecha: serverTimestamp(),
         fechaString: new Date().toISOString().split('T')[0],
         createdAt: serverTimestamp(),
@@ -290,7 +293,37 @@ export function VentaForm() {
         )}
 
         {/* Opciones */}
-        <div className="rounded-lg border bg-white p-6 shadow">
+        <div className="rounded-lg border bg-white p-6 shadow space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Forma de pago *
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="formaPago"
+                  value="efectivo"
+                  checked={formaPago === 'efectivo'}
+                  onChange={() => setFormaPago('efectivo')}
+                  className="h-4 w-4 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Efectivo</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="formaPago"
+                  value="transferencia"
+                  checked={formaPago === 'transferencia'}
+                  onChange={() => setFormaPago('transferencia')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Transferencia</span>
+              </label>
+            </div>
+          </div>
+
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"

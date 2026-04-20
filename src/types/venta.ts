@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 export type VentaEstado = 'pendiente' | 'completada' | 'cancelada';
+export type FormaPago = 'efectivo' | 'transferencia';
 
 export interface VentaItem {
   productoId: string;
@@ -20,6 +21,7 @@ export interface Venta {
   fecha: Timestamp;
   fechaString?: string;
   estado: VentaEstado;
+  formaPago?: FormaPago;
   createdAt?: Timestamp;
 }
 

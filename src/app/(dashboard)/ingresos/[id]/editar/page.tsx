@@ -27,6 +27,7 @@ export default function IngresoEditarPage() {
     descripcion: '',
     fecha: new Date().toISOString().split('T')[0],
     categoria: 'Venta',
+    formaPago: 'efectivo',
   });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -47,6 +48,7 @@ export default function IngresoEditarPage() {
           descripcion: data.descripcion || '',
           fecha: data.fecha || new Date().toISOString().split('T')[0],
           categoria: data.categoria || 'Venta',
+          formaPago: data.formaPago || 'efectivo',
         });
       } catch (error) {
         console.error('Error fetching ingreso:', error);
@@ -186,6 +188,23 @@ export default function IngresoEditarPage() {
                   required
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="formaPago" className="block text-sm font-medium text-gray-700">
+                  Forma de pago *
+                </label>
+                <select
+                  id="formaPago"
+                  name="formaPago"
+                  value={formData.formaPago}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="efectivo">Efectivo</option>
+                  <option value="transferencia">Transferencia</option>
+                </select>
               </div>
             </div>
           </div>

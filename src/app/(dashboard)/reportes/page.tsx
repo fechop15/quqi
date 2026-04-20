@@ -30,6 +30,12 @@ interface ReportData {
   totalVentas: number;
   ventasCount: number;
   productosVendidos: number;
+  efectivoVentas: number;
+  transferenciaVentas: number;
+  efectivoIngresos: number;
+  transferenciaIngresos: number;
+  efectivoEgresos: number;
+  transferenciaEgresos: number;
   topProductos: { nombre: string; cantidad: number; total: number }[];
   ingresosPorCategoria: { categoria: string; total: number }[];
   egresosPorCategoria: { categoria: string; total: number }[];
@@ -95,6 +101,36 @@ export default function ReportesPage() {
         return sum + (doc.items?.reduce((s: number, item: any) => s + (item.cantidad || 0), 0) || 0);
       }, 0);
 
+      let efectivoVentas = 0;
+      let transferenciaVentas = 0;
+      ventasData.forEach((doc: any) => {
+        if (!doc.formaPago || doc.formaPago === 'efectivo') {
+          efectivoVentas += doc.total || 0;
+        } else if (doc.formaPago === 'transferencia') {
+          transferenciaVentas += doc.total || 0;
+        }
+      });
+
+      let efectivoIngresos = 0;
+      let transferenciaIngresos = 0;
+      ingresosData.forEach((doc: any) => {
+        if (!doc.formaPago || doc.formaPago === 'efectivo') {
+          efectivoIngresos += doc.monto || 0;
+        } else if (doc.formaPago === 'transferencia') {
+          transferenciaIngresos += doc.monto || 0;
+        }
+      });
+
+      let efectivoEgresos = 0;
+      let transferenciaEgresos = 0;
+      egresosData.forEach((doc: any) => {
+        if (!doc.formaPago || doc.formaPago === 'efectivo') {
+          efectivoEgresos += doc.monto || 0;
+        } else if (doc.formaPago === 'transferencia') {
+          transferenciaEgresos += doc.monto || 0;
+        }
+      });
+
       const categoriaIngresos: Record<string, number> = {};
       ingresosData.forEach((doc: any) => {
         const cat = doc.categoria || 'Sin categoría';
@@ -145,6 +181,12 @@ export default function ReportesPage() {
         totalVentas,
         ventasCount,
         productosVendidos,
+        efectivoVentas,
+        transferenciaVentas,
+        efectivoIngresos,
+        transferenciaIngresos,
+        efectivoEgresos,
+        transferenciaEgresos,
         topProductos,
         ingresosPorCategoria,
         egresosPorCategoria,
@@ -309,6 +351,38 @@ export default function ReportesPage() {
                 <div className="h-1 bg-[#8b5cf6]" />
               </Card>
             </div>
+
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-[#1e293b] mb-4">
+                  Efectivo vs Transferencia
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                    <p className="text-sm font-medium text-green-700">En Efectivo</p>
+                    <p className="text-xl font-bold text-green-800 mt-1">
+                      {formatCurrency(reportData.efectivoVentas + reportData.efectivoIngresos - reportData.efectivoEgresos)}
+                    </p>
+                    <div className="mt-2 text-xs text-green-600 space-y-1">
+                      <p>Ventas: {formatCurrency(reportData.efectivoVentas)}</p>
+                      <p>Ingresos: {formatCurrency(reportData.efectivoIngresos)}</p>
+                      <p>Egresos: {formatCurrency(reportData.efectivoEgresos)}</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <p className="text-sm font-medium text-blue-700">En Transferencia</p>
+                    <p className="text-xl font-bold text-blue-800 mt-1">
+                      {formatCurrency(reportData.transferenciaVentas + reportData.transferenciaIngresos - reportData.transferenciaEgresos)}
+                    </p>
+                    <div className="mt-2 text-xs text-blue-600 space-y-1">
+                      <p>Ventas: {formatCurrency(reportData.transferenciaVentas)}</p>
+                      <p>Ingresos: {formatCurrency(reportData.transferenciaIngresos)}</p>
+                      <p>Egresos: {formatCurrency(reportData.transferenciaEgresos)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
             <div className="grid gap-6 lg:grid-cols-3">
               <Card>

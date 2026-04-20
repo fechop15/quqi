@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
+import { FormaPago } from './venta';
 
 export interface Ingreso {
   id: string;
@@ -6,6 +7,7 @@ export interface Ingreso {
   descripcion: string;
   fecha: string;
   categoria: string;
+  formaPago?: FormaPago;
   creadoPor: string;
   createdAt: Timestamp;
 }
@@ -15,4 +17,5 @@ export interface IngresoForm {
   descripcion: string;
   fecha: string;
   categoria: string;
+  formaPago: 'efectivo' | 'transferencia';
 }

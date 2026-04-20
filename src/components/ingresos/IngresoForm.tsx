@@ -18,11 +18,17 @@ const categorias = [
   { value: 'Otro', label: 'Otro' },
 ];
 
+const formasPago = [
+  { value: 'efectivo', label: 'Efectivo' },
+  { value: 'transferencia', label: 'Transferencia' },
+];
+
 const initialForm: IngresoFormType = {
   monto: 0,
   descripcion: '',
   fecha: new Date().toISOString().split('T')[0],
   categoria: 'Venta',
+  formaPago: 'efectivo',
 };
 
 export function IngresoForm() {
@@ -108,6 +114,15 @@ export function IngresoForm() {
             type="date"
             value={formData.fecha}
             onChange={handleChange}
+            required
+          />
+
+          <Select
+            label="Forma de pago *"
+            name="formaPago"
+            value={formData.formaPago}
+            onChange={handleChange}
+            options={formasPago}
             required
           />
         </div>

@@ -8,6 +8,7 @@ import { collection, getDocs, query, where, orderBy, limit } from 'firebase/fire
 import { db } from '@/lib/firebase';
 import { formatCurrency } from '@/lib/utils';
 import { Venta } from '@/types/venta';
+import { Producto } from '@/types/producto';
 import {
   DollarSign,
   Package,
@@ -15,6 +16,7 @@ import {
   TrendingDown,
   Plus,
   Calendar,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -22,6 +24,12 @@ interface DashboardStats {
   productosStock: number;
   ingresosPeriodo: number;
   egresosPeriodo: number;
+  efectivoVentas: number;
+  transferenciaVentas: number;
+  efectivoIngresos: number;
+  transferenciaIngresos: number;
+  efectivoEgresos: number;
+  transferenciaEgresos: number;
 }
 
 interface ChartData {
@@ -39,10 +47,17 @@ export default function DashboardPage() {
     productosStock: 0,
     ingresosPeriodo: 0,
     egresosPeriodo: 0,
+    efectivoVentas: 0,
+    transferenciaVentas: 0,
+    efectivoIngresos: 0,
+    transferenciaIngresos: 0,
+    efectivoEgresos: 0,
+    transferenciaEgresos: 0,
   });
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [ultimasVentas, setUltimasVentas] = useState<Venta[]>([]);
+  const [productosBajoStock, setProductosBajoStock] = useState<Producto[]>([]);
   const [periodo, setPeriodo] = useState<'anio' | 'mes'>('anio');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -53,6 +68,13 @@ export default function DashboardPage() {
         const hoy = new Date();
         const productosSnapshot = await getDocs(collection(db, 'productos'));
         const productosStock = productosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().stock || 0), 0);
+
+        const productosData = productosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Producto[];
+        const bajoStock = productosData
+          .filter((p) => p.stock > 0 && p.stock <= 5 && p.activo)
+          .sort((a, b) => a.stock - b.stock)
+          .slice(0, 10);
+        setProductosBajoStock(bajoStock);
 
         let fechaInicio: Date;
         let fechaFin: Date;
@@ -70,14 +92,21 @@ export default function DashboardPage() {
 
         const ventasQuery = query(collection(db, 'ventas'));
         const ventasSnapshot = await getDocs(ventasQuery);
-        const ventasPeriodo = ventasSnapshot.docs.reduce((sum, doc) => {
+        let ventasPeriodo = 0;
+        let efectivoVentas = 0;
+        let transferenciaVentas = 0;
+        ventasSnapshot.docs.forEach((doc) => {
           const data = doc.data();
           const fechaStr = data.fechaString || (data.fecha?.toDate ? data.fecha.toDate().toISOString().split('T')[0] : '');
           if (fechaStr >= fechaInicio.toISOString().split('T')[0] && fechaStr <= fechaFin.toISOString().split('T')[0]) {
-            return sum + (data.total || 0);
+            ventasPeriodo += data.total || 0;
+            if (!data.formaPago || data.formaPago === 'efectivo') {
+              efectivoVentas += data.total || 0;
+            } else if (data.formaPago === 'transferencia') {
+              transferenciaVentas += data.total || 0;
+            }
           }
-          return sum;
-        }, 0);
+        });
 
         const ingresosQuery = query(
           collection(db, 'ingresos'),
@@ -85,7 +114,18 @@ export default function DashboardPage() {
           where('fecha', '<=', fechaFin.toISOString().split('T')[0])
         );
         const ingresosSnapshot = await getDocs(ingresosQuery);
-        const ingresosPeriodo = ingresosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
+        let ingresosPeriodo = 0;
+        let efectivoIngresos = 0;
+        let transferenciaIngresos = 0;
+        ingresosSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          ingresosPeriodo += data.monto || 0;
+          if (!data.formaPago || data.formaPago === 'efectivo') {
+            efectivoIngresos += data.monto || 0;
+          } else if (data.formaPago === 'transferencia') {
+            transferenciaIngresos += data.monto || 0;
+          }
+        });
 
         const egresosQuery = query(
           collection(db, 'egresos'),
@@ -93,13 +133,30 @@ export default function DashboardPage() {
           where('fecha', '<=', fechaFin.toISOString().split('T')[0])
         );
         const egresosSnapshot = await getDocs(egresosQuery);
-        const egresosPeriodo = egresosSnapshot.docs.reduce((sum, doc) => sum + (doc.data().monto || 0), 0);
+        let egresosPeriodo = 0;
+        let efectivoEgresos = 0;
+        let transferenciaEgresos = 0;
+        egresosSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          egresosPeriodo += data.monto || 0;
+          if (!data.formaPago || data.formaPago === 'efectivo') {
+            efectivoEgresos += data.monto || 0;
+          } else if (data.formaPago === 'transferencia') {
+            transferenciaEgresos += data.monto || 0;
+          }
+        });
 
         setStats({
           ventasPeriodo,
           productosStock,
           ingresosPeriodo,
           egresosPeriodo,
+          efectivoVentas,
+          transferenciaVentas,
+          efectivoIngresos,
+          transferenciaIngresos,
+          efectivoEgresos,
+          transferenciaEgresos,
         });
 
         const mesesData: ChartData[] = [];
@@ -300,6 +357,21 @@ export default function DashboardPage() {
               <DollarSign className="h-8 w-8 text-white" />
             </div>
           </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="rounded-lg bg-white/10 p-3">
+              <p className="text-xs text-white/70">Efectivo</p>
+              <p className="text-lg font-bold text-white">
+                {formatCurrency(stats.efectivoVentas + stats.efectivoIngresos - stats.efectivoEgresos)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/10 p-3">
+              <p className="text-xs text-white/70">Transferencia</p>
+              <p className="text-lg font-bold text-white">
+                {formatCurrency(stats.transferenciaVentas + stats.transferenciaIngresos - stats.transferenciaEgresos)}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -337,6 +409,33 @@ export default function DashboardPage() {
           <QuickActions actions={quickActions} />
           <RecentSales sales={ultimasVentas} />
         </div>
+
+        {productosBajoStock.length > 0 && (
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <h3 className="text-lg font-semibold text-orange-800">Productos con stock bajo</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-orange-200">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-orange-700 uppercase">Producto</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-orange-700 uppercase">Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productosBajoStock.map((producto) => (
+                    <tr key={producto.id} className="border-b border-orange-100">
+                      <td className="px-3 py-2 text-sm text-gray-700">{producto.nombre}</td>
+                      <td className="px-3 py-2 text-sm text-right font-medium text-orange-600">{producto.stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
