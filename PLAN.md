@@ -313,6 +313,15 @@ service cloud.firestore {
       return getUserRole() in ['admin', 'gerente'];
     }
 
+    // Catálogo público (sin autenticación)
+    match /productos/{productoId} {
+      allow read: if true;
+    }
+
+    match /configuracion/{configId} {
+      allow read: if true;
+    }
+
     // Usuarios (perfiles del sistema)
     match /users/{userId} {
       allow read: if isLoggedIn();
@@ -340,11 +349,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Productos
+    // Productos (admin y gerente pueden crear/editar)
     match /productos/{productoId} {
       allow read: if isLoggedIn();
       allow create, update: if isLoggedIn() && isManager();
       allow delete: if isAdmin();
+    }
+
+    // Configuración (solo admin y gerente)
+    match /configuracion/{configId} {
+      allow read: if isLoggedIn() && isManager();
+      allow write: if isLoggedIn() && isManager();
     }
 
     // Movimientos de inventario

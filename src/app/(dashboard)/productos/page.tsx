@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import { useRole } from '@/hooks/useRole';
-import { Plus } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 
 export default function ProductosPage() {
   const role = useRole();
@@ -17,13 +17,20 @@ export default function ProductosPage() {
         title="Productos"
         description="Gestiona tu catálogo de productos"
         actions={
-          canCreate && (
-            <Link href="/productos/nuevo">
-              <Button leftIcon={<Plus className="h-4 w-4" />}>
-                Nuevo Producto
+          <div className="flex gap-2">
+            <Link href="/catalogo" target="_blank">
+              <Button variant="outline" leftIcon={<ExternalLink className="h-4 w-4" />}>
+                Ver Catálogo
               </Button>
             </Link>
-          )
+            {canCreate && (
+              <Link href="/productos/nuevo">
+                <Button leftIcon={<Plus className="h-4 w-4" />}>
+                  Nuevo Producto
+                </Button>
+              </Link>
+            )}
+          </div>
         }
       />
 

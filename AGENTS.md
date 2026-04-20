@@ -30,6 +30,7 @@ Without ALL of these, build fails with `auth/invalid-api-key`.
 | Route | Description |
 |-------|-------------|
 | `/login`, `/registro` | Autenticación pública |
+| `/catalogo` | Catálogo público de productos |
 | `/dashboard` | Panel principal con estadísticas |
 | `/productos` | CRUD productos |
 | `/ventas` | Registro y listado de ventas |
@@ -37,6 +38,7 @@ Without ALL of these, build fails with `auth/invalid-api-key`.
 | `/egresos` | Egresos/gastos |
 | `/usuarios` | Gestión de usuarios (admin) |
 | `/reportes` | Reportes y gráficos |
+| `/configuracion` | Configuración del negocio (admin) |
 | `/perfil` | Perfil del usuario |
 | `/inventario/movimientos` | Historial de inventario |
 
@@ -48,10 +50,15 @@ Without ALL of these, build fails with `auth/invalid-api-key`.
 ## Collections Firestore
 - `users` - Perfiles de usuarios (uid, email, nombre, role, activo)
 - `productos` - Catálogo de productos
+- `configuracion` - Configuración del negocio (nombre, logo, WhatsApp, color)
 - `ventas` - Registro de ventas
 - `ingresos` - Ingresos de mercadería
 - `egresos` - Egresos/gastos
-- `inventario` - Movimientos de stock
+- `movimientos_inventario` - Movimientos de stock
+
+## Firestore Rules
+- `productos`, `configuracion` - lectura pública (sin auth)
+- `users`, `ventas`, `productos` (escritura), `configuracion` (escritura), `ingresos`, `egresos`, `movimientos_inventario` - requieren auth
 
 ## Key Files
 - `src/lib/firebase.ts` - Firebase initialization

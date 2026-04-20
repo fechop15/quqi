@@ -14,6 +14,7 @@ import { Package, DollarSign, Archive } from 'lucide-react';
 const initialForm: ProductoFormType = {
   nombre: '',
   descripcion: '',
+  imagenes: [],
   precioCompra: 0,
   precioVenta: 0,
   stock: 0,
@@ -21,6 +22,7 @@ const initialForm: ProductoFormType = {
   categoria: '',
   sku: '',
   activo: true,
+  mostrarEnCatalogo: true,
 };
 
 interface ProductoFormProps {
@@ -55,6 +57,7 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
       setFormData({
         nombre: data.nombre || '',
         descripcion: data.descripcion || '',
+        imagenes: data.imagenes || [],
         precioCompra: data.precioCompra || 0,
         precioVenta: data.precioVenta || 0,
         stock: data.stock || 0,
@@ -62,6 +65,7 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
         categoria: data.categoria || '',
         sku: data.sku || '',
         activo: data.activo !== false,
+        mostrarEnCatalogo: data.mostrarEnCatalogo !== false,
       });
     } catch (error) {
       console.error('Error fetching producto:', error);
@@ -208,6 +212,48 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
             />
           </div>
 
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Imágenes del producto
+            </label>
+            <div className="space-y-2">
+              {formData.imagenes?.map((img, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <input
+                    type="url"
+                    value={img}
+                    onChange={(e) => {
+                      const nuevas = [...(formData.imagenes || [])];
+                      nuevas[index] = e.target.value;
+                      setFormData({ ...formData, imagenes: nuevas });
+                    }}
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nuevas = formData.imagenes?.filter((_, i) => i !== index);
+                      setFormData({ ...formData, imagenes: nuevas || [] });
+                    }}
+                    className="text-red-500 hover:text-red-700 px-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, imagenes: [...(formData.imagenes || []), ''] });
+                }}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                + Agregar imagen
+              </button>
+            </div>
+          </div>
+
           <Input
             label="SKU / Código"
             name="sku"
@@ -309,17 +355,31 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-[#1e293b] mb-4">Estado</h3>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.activo}
-            onChange={(e) => setFormData((prev) => ({ ...prev, activo: e.target.checked }))}
-            className="h-4 w-4 rounded border-[#d1d5db] text-[#6366f1] focus:ring-[#6366f1]"
-          />
-          <span className="text-sm text-[#475569]">
-            Producto activo (visible en el sistema)
-          </span>
-        </label>
+        <div className="space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.activo}
+              onChange={(e) => setFormData((prev) => ({ ...prev, activo: e.target.checked }))}
+              className="h-4 w-4 rounded border-[#d1d5db] text-[#6366f1] focus:ring-[#6366f1]"
+            />
+            <span className="text-sm text-[#475569]">
+              Producto activo (visible en el sistema)
+            </span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.mostrarEnCatalogo}
+              onChange={(e) => setFormData((prev) => ({ ...prev, mostrarEnCatalogo: e.target.checked }))}
+              className="h-4 w-4 rounded border-[#d1d5db] text-[#6366f1] focus:ring-[#6366f1]"
+            />
+            <span className="text-sm text-[#475569]">
+              Mostrar en catálogo público
+            </span>
+          </label>
+        </div>
       </Card>
 
       <div className="flex gap-3">

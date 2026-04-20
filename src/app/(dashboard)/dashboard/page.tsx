@@ -17,6 +17,7 @@ import {
   Plus,
   Calendar,
   AlertTriangle,
+  ExternalLink,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -238,9 +239,10 @@ export default function DashboardPage() {
     { value: 11, label: 'Diciembre' },
   ];
 
-  const quickActions: { label: string; href: string; icon: React.ReactNode; variant: 'primary' | 'success' | 'warning' }[] = [
+  const quickActions: { label: string; href: string; icon: React.ReactNode; variant: 'primary' | 'success' | 'warning'; target?: '_blank' }[] = [
     { label: 'Nueva venta', href: '/ventas/nueva', icon: <Plus className="h-4 w-4" />, variant: 'primary' },
     { label: 'Nuevo producto', href: '/productos/nuevo', icon: <Package className="h-4 w-4" />, variant: 'success' },
+    { label: 'Ver catálogo', href: '/catalogo', icon: <ExternalLink className="h-4 w-4" />, variant: 'primary', target: '_blank' as const },
   ];
 
   if (role.isAdmin() || role.isGerente()) {

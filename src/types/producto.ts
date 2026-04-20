@@ -4,6 +4,7 @@ export interface Producto {
   id: string;
   nombre: string;
   descripcion?: string;
+  imagenes?: string[];
   precioCompra: number;
   precioVenta: number;
   stock: number;
@@ -11,6 +12,7 @@ export interface Producto {
   categoria?: string;
   sku?: string;
   activo: boolean;
+  mostrarEnCatalogo: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -18,6 +20,7 @@ export interface Producto {
 export interface ProductoForm {
   nombre: string;
   descripcion?: string;
+  imagenes?: string[];
   precioCompra: number;
   precioVenta: number;
   stock: number;
@@ -25,4 +28,5 @@ export interface ProductoForm {
   categoria?: string;
   sku?: string;
   activo: boolean;
+  mostrarEnCatalogo: boolean;
 }

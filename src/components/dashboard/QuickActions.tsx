@@ -6,6 +6,7 @@ interface QuickAction {
   href: string;
   icon: React.ReactNode;
   variant: 'primary' | 'success' | 'warning' | 'danger';
+  target?: '_blank';
 }
 
 interface QuickActionsProps {
@@ -29,7 +30,13 @@ export function QuickActions({ actions, title = 'Acciones rápidas' }: QuickActi
 
       <div className="grid gap-3 sm:grid-cols-2">
         {actions.map((action, index) => (
-          <Link key={index} href={action.href} className="block">
+          <Link
+            key={index}
+            href={action.href}
+            className="block"
+            target={action.target}
+            rel={action.target === '_blank' ? 'noopener noreferrer' : undefined}
+          >
             <div
               className={`
                 flex items-center gap-3 rounded-lg px-4 py-3

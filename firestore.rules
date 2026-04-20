@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function hasRole(requiredRoles) {
+      let userRole = getUserRole();
+      return userRole in requiredRoles;
+    }
+
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+
+    function isManager() {
+      return getUserRole() in ['admin', 'gerente'];
+    }
+
+    // Catálogo público (sin autenticación)
+    match /productos/{productoId} {
+      allow read: if true;
+    }
+
+    match /configuracion/{configId} {
+      allow read: if true;
+    }
+
+    // Usuarios (perfiles del sistema)
+    match /users/{userId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Ingresos
+    match /ingresos/{ingresoId} {
+      allow read: if isLoggedIn() && isManager();
+      allow create, update, delete: if isLoggedIn() && isManager();
+    }
+
+    // Egresos
+    match /egresos/{egresoId} {
+      allow read: if isLoggedIn() && isManager();
+      allow create, update, delete: if isLoggedIn() && isManager();
+    }
+
+    // Ventas
+    match /ventas/{ventaId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && isManager();
+      allow delete: if isAdmin();
+    }
+
+    // Productos (admin y gerente pueden crear/editar)
+    match /productos/{productoId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn() && isManager();
+      allow delete: if isAdmin();
+    }
+
+    // Configuración (solo admin y gerente)
+    match /configuracion/{configId} {
+      allow read: if isLoggedIn() && isManager();
+      allow write: if isLoggedIn() && isManager();
+    }
+
+    // Movimientos de inventario
+    match /movimientos_inventario/{movimientoId} {
+      allow read: if isLoggedIn() && isManager();
+      allow create: if isLoggedIn() && isManager();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

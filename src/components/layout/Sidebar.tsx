@@ -17,6 +17,7 @@ import {
   LogOut,
   ChevronRight,
   FileText,
+  Settings,
 } from 'lucide-react';
 
 interface NavItem {
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
   { href: '/egresos', label: 'Egresos', icon: <TrendingDown className="h-5 w-5" />, roles: ['admin', 'gerente'] },
   { href: '/usuarios', label: 'Usuarios', icon: <Users className="h-5 w-5" />, roles: ['admin'] },
   { href: '/perfil', label: 'Mi Perfil', icon: <User className="h-5 w-5" /> },
+  { href: '/configuracion', label: 'Configuración', icon: <Settings className="h-5 w-5" />, roles: ['admin', 'gerente'] },
 ];
 
 interface SidebarProps {
