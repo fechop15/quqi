@@ -216,6 +216,9 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imágenes del producto
             </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Tamaño recomendado: 800x800px. Links directos a imágenes (jpg, png, webp)
+            </p>
             <div className="space-y-2">
               {formData.imagenes?.map((img, index) => (
                 <div key={index} className="flex gap-2 items-center">
@@ -227,7 +230,7 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
                       nuevas[index] = e.target.value;
                       setFormData({ ...formData, imagenes: nuevas });
                     }}
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    placeholder="https://ejemplo.com/imagen.jpg (800x800px)"
                     className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   <button

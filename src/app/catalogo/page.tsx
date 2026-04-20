@@ -80,7 +80,7 @@ export default function CatalogoPage() {
     if (carrito.length === 0) return '';
 
     const mensaje = encodeURIComponent(
-      `Hello, I'm interested in the following products:\n\n` +
+      `Hola, me interesan los siguientes productos:\n\n` +
         carrito
           .map(
             (item) =>
@@ -290,7 +290,7 @@ export default function CatalogoPage() {
                       onClick={() => {
                         window.open(
                           `https://wa.me/${config?.whatsappNumber || '50600000000'}?text=${encodeURIComponent(
-                            `Hola, me interesa comprar: ${producto.nombre} - ${formatCurrency(producto.precioVenta)}`
+                            `Hola, quiero comprar: ${producto.nombre} - ${formatCurrency(producto.precioVenta)}`
                           )}`,
                           '_blank'
                         );
