@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui';
 import { Button } from '@/components/ui';
 import { Card } from '@/components/ui';
 import { toast } from 'sonner';
-import { Settings } from 'lucide-react';
+import { Settings, Loader2 } from 'lucide-react';
 
 const defaultConfig = {
   whatsappNumber: '',
@@ -28,6 +28,7 @@ export default function ConfiguracionPage() {
   const { config, loading: loadingConfig, guardarConfig } = useConfiguracion();
   const [formData, setFormData] = useState(defaultConfig);
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     if (!loadingConfig && config) {
@@ -116,13 +117,45 @@ export default function ConfiguracionPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <Input
-                label="URL del Logo (opcional)"
-                name="logoUrl"
-                value={formData.logoUrl}
-                onChange={handleChange}
-                placeholder="https://ejemplo.com/logo.png"
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Logo del negocio
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Tamaño recomendado: 400x400px (jpg, png, webp). Máximo 5MB.
+              </p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={uploadingLogo}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error('La imagen debe ser menor a 5MB');
+                    return;
+                  }
+
+                  setUploadingLogo(true);
+                  try {
+                    const { uploadImage } = await import('@/lib/firebase');
+                    const url = await uploadImage(file, `logo/${Date.now()}-${file.name}`);
+                    setFormData((prev) => ({ ...prev, logoUrl: url }));
+                    toast.success('Logo cargado correctamente');
+                  } catch (error) {
+                    console.error('Error uploading:', error);
+                    toast.error('Error al cargar el logo');
+                  }
+                  setUploadingLogo(false);
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
+              {uploadingLogo && (
+                <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Subiendo logo...
+                </div>
+              )}
               <div className="mt-2">
                 <p className="text-xs text-[#64748b] mb-1">Vista previa:</p>
                 <div className="h-20 w-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
@@ -140,6 +173,15 @@ export default function ConfiguracionPage() {
                   )}
                 </div>
               </div>
+              {formData.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, logoUrl: '' }))}
+                  className="text-xs text-red-500 hover:text-red-700 mt-1"
+                >
+                  Eliminar logo
+                </button>
+              )}
             </div>
           </div>
         </Card>
