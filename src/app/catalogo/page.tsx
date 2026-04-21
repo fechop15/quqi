@@ -19,6 +19,7 @@ export default function CatalogoPage() {
   const [imagenesActuales, setImagenesActuales] = useState<Record<string, number>>({});
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('');
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<{ productoId: string; x: number | null }>({ productoId: '', x: null });
 
   useEffect(() => {
     async function fetchData() {
@@ -225,11 +226,33 @@ export default function CatalogoPage() {
                 key={producto.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="aspect-square bg-gray-100 relative">
+                <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                  <div
+                    className="absolute inset-0 touch-pan-y"
+                    onTouchStart={(e) => {
+                      const touch = e.touches[0];
+                      setTouchStartX({ productoId: producto.id, x: touch.clientX });
+                    }}
+                    onTouchEnd={(e) => {
+                      if (touchStartX.productoId === producto.id && touchStartX.x !== null) {
+                        const touch = e.changedTouches[0];
+                        const diff = touchStartX.x - touch.clientX;
+                        if (Math.abs(diff) > 30) {
+                          const direction = diff > 30 ? 1 : -1;
+                          const imagenes = getImagenes(producto);
+                          const actual = imagenesActuales[producto.id] || 0;
+                          const nuevo = (actual + direction + imagenes.length) % imagenes.length;
+                          setImagenesActuales({ ...imagenesActuales, [producto.id]: nuevo });
+                        }
+                        setTouchStartX({ productoId: '', x: null });
+                      }
+                    }}
+                  />
                   <img
+                    key={imagenesActuales[producto.id] || 0}
                     src={getImagenes(producto)[imagenesActuales[producto.id] || 0]}
                     alt={producto.nombre}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = IMAGEN_DEFAULT;
                     }}
