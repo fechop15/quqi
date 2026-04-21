@@ -18,6 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Quqi - Sistema de Gestión",
   description: "Sistema de gestión de ingresos, egresos y ventas",
+  icons: {
+    icon: "/icono.png",
+  },
 };
 
 export default function RootLayout({
