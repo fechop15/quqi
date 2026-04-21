@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/useRole';
+import { useConfiguracion } from '@/hooks/useConfiguracion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
@@ -49,6 +50,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const { profile, logout } = useAuth();
   const role = useRole();
   const pathname = usePathname();
+  const { config } = useConfiguracion();
 
   const handleLogout = async () => {
     try {
@@ -95,22 +97,35 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         `}
       >
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-500 text-white">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-5 w-5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {config?.logoUrl ? (
+            <img
+              src={config.logoUrl}
+              alt={config.nombreNegocio || 'Logo'}
+              className="h-9 w-9 object-contain rounded-lg"
+            />
+          ) : (
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-lg"
+              style={{ backgroundColor: config?.colorPrimario || '#6366f1', color: 'white' }}
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold text-text-primary">Quqi</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-5 w-5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+          )}
+          <span className="text-xl font-bold text-text-primary">
+            {config?.nombreNegocio || 'Quqi'}
+          </span>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4">

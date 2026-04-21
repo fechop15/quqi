@@ -236,7 +236,7 @@ export default function ConfiguracionPage() {
           </div>
         </Card>
 
-        <div className="flex gap-3">
+        <div className="flex justify-center">
           <Button type="submit" isLoading={loading}>
             Guardar configuración
           </Button>
