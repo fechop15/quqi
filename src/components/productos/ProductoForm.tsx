@@ -9,7 +9,7 @@ import { ProductoForm as ProductoFormType, Producto } from '@/types/producto';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/lib/utils';
 import { Input, Textarea, Button, Card } from '@/components/ui';
-import { Package, DollarSign, Archive } from 'lucide-react';
+import { Package, DollarSign, Archive, Loader2 } from 'lucide-react';
 
 const initialForm: ProductoFormType = {
   nombre: '',
@@ -35,6 +35,7 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
   const { user, profile } = useAuth();
   const [formData, setFormData] = useState<ProductoFormType>(initialForm);
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [fetching, setFetching] = useState(mode === 'edit');
 
   const productoId = params?.id as string;
@@ -217,44 +218,72 @@ export function ProductoForm({ mode = 'create' }: ProductoFormProps) {
               Imágenes del producto
             </label>
             <p className="text-xs text-gray-500 mb-2">
-              Tamaño recomendado: 800x800px. Links directos a imágenes (jpg, png, webp)
+              Tamaño recomendado: 800x800px (jpg, png, webp). Máximo 5MB por imagen.
             </p>
-            <div className="space-y-2">
-              {formData.imagenes?.map((img, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <input
-                    type="url"
-                    value={img}
-                    onChange={(e) => {
-                      const nuevas = [...(formData.imagenes || [])];
-                      nuevas[index] = e.target.value;
-                      setFormData({ ...formData, imagenes: nuevas });
-                    }}
-                    placeholder="https://ejemplo.com/imagen.jpg (800x800px)"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nuevas = formData.imagenes?.filter((_, i) => i !== index);
-                      setFormData({ ...formData, imagenes: nuevas || [] });
-                    }}
-                    className="text-red-500 hover:text-red-700 px-2"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData({ ...formData, imagenes: [...(formData.imagenes || []), ''] });
-                }}
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
-                + Agregar imagen
-              </button>
-            </div>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              disabled={uploadingImages}
+              onChange={async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+
+                setUploadingImages(true);
+                const newUrls: string[] = [];
+                for (const file of files) {
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error('Cada imagen debe ser menor a 5MB');
+                    continue;
+                  }
+                  try {
+                    const { uploadImage } = await import('@/lib/firebase');
+                    const url = await uploadImage(file, `productos/${Date.now()}-${file.name}`);
+                    newUrls.push(url);
+                  } catch (error) {
+                    console.error('Error uploading:', error);
+                    toast.error('Error al subir imagen');
+                  }
+                }
+                if (newUrls.length > 0) {
+                  setFormData({
+                    ...formData,
+                    imagenes: [...(formData.imagenes || []), ...newUrls],
+                  });
+                }
+                setUploadingImages(false);
+              }}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {uploadingImages && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Subiendo imágenes...
+              </div>
+            )}
+            {formData.imagenes && formData.imagenes.length > 0 && (
+              <div className="mt-3 grid grid-cols-4 gap-2">
+                {formData.imagenes.map((img, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={img}
+                      alt={`Imagen ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nuevas = formData.imagenes?.filter((_, i) => i !== index);
+                        setFormData({ ...formData, imagenes: nuevas || [] });
+                      }}
+                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Input
